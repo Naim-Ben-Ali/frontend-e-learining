@@ -1,0 +1,177 @@
+<div class="mycourses-shell">
+  <app-student-navbar></app-student-navbar>
+
+  <div class="mycourses-body">
+
+    <!-- ── HEADER ────────────────────────────────────────────────────── -->
+    <header class="mc-header reveal">
+      <div class="mc-header-inner">
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            My Learning
+          </div>
+          <h1 class="mc-title">My <em class="title-em">Courses</em></h1>
+          <p class="mc-sub">Track your progress and continue where you left off.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-explore" (click)="navigateToDiscovery()">
+            <span>🔍</span> Find More Courses
+          </button>
+        </div>
+      </div>
+
+      <!-- ── KPI STRIP ──────────────────────────────────────────────── -->
+      <div class="kpi-strip">
+        <div class="kpi-card kpi-teal">
+          <div class="kpi-icon-wrap" style="background:#CCEDE9">📖</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ enrolledCourses.length }}</div>
+            <div class="kpi-label">Total Enrolled</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon-wrap" style="background:#D4EDDF">✅</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ completedCount }}</div>
+            <div class="kpi-label">Completed</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon-wrap" style="background:#EAF0FB">⏳</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ inProgressCount }}</div>
+            <div class="kpi-label">In Progress</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon-wrap" style="background:#FAE9C3">📊</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ avgProgress }}%</div>
+            <div class="kpi-label">Avg. Progress</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── FILTER / SORT BAR ──────────────────────────────────────────── -->
+    <div class="controls-bar reveal rd1">
+      <div class="filter-tabs">
+        <button class="ftab" [class.active]="filterMode === 'all'" (click)="setFilter('all')">All</button>
+        <button class="ftab" [class.active]="filterMode === 'in-progress'" (click)="setFilter('in-progress')">In Progress</button>
+        <button class="ftab" [class.active]="filterMode === 'completed'" (click)="setFilter('completed')">Completed</button>
+        <button class="ftab" [class.active]="filterMode === 'free'" (click)="setFilter('free')">Free</button>
+      </div>
+      <div class="sort-row">
+        <label class="sort-label">Sort:</label>
+        <select class="sort-select" [(ngModel)]="sortMode" (change)="applySort()">
+          <option value="recent">Recently Enrolled</option>
+          <option value="progress">Most Progress</option>
+          <option value="title">Title A–Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── LOADING ────────────────────────────────────────────────────── -->
+    <div class="dash-loading" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Loading your courses…</p>
+    </div>
+
+    <!-- ── ERROR ──────────────────────────────────────────────────────── -->
+    <div class="error-panel reveal" *ngIf="errorMessage && !isLoading">
+      <span>⚠️ {{ errorMessage }}</span>
+      <button class="btn-retry" (click)="loadCourses()">Retry</button>
+    </div>
+
+    <!-- ── COURSES GRID ────────────────────────────────────────────────── -->
+    <div class="courses-grid reveal rd2" *ngIf="!isLoading && filteredCourses.length > 0">
+      <div
+        *ngFor="let course of filteredCourses"
+        class="mc-card"
+        (click)="viewCourse(course.id)"
+      >
+        <!-- Cover -->
+        <div class="mc-card-img">
+          <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="mc-img">
+          <div class="mc-img-overlay"></div>
+          <!-- Progress ring overlay -->
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/>
+              <circle
+                cx="22" cy="22" r="18"
+                stroke="white" stroke-width="3" fill="none"
+                stroke-linecap="round"
+                [style.stroke-dasharray]="'113'"
+                [style.stroke-dashoffset]="113 - (113 * getProgress(course.id) / 100)"
+                transform="rotate(-90 22 22)"
+                style="transition: stroke-dashoffset 0.8s ease;">
+              </circle>
+              <text x="22" y="26" text-anchor="middle" fill="white" font-size="9" font-weight="700"
+                    font-family="'Plus Jakarta Sans', sans-serif">
+                {{ getProgress(course.id) }}%
+              </text>
+            </svg>
+          </div>
+          <span class="mc-price-badge" [class.free]="course.isFree">
+            {{ course.isFree ? 'Free' : '$' + course.price }}
+          </span>
+        </div>
+
+        <!-- Body -->
+        <div class="mc-card-body">
+          <div class="mc-tags">
+            <span class="mc-tag teal">{{ course.subject }}</span>
+            <span class="mc-tag blue">{{ course.educationLevel }}</span>
+          </div>
+          <h3 class="mc-title-card">{{ course.title }}</h3>
+          <p class="mc-teacher">by {{ course.teacherName }}</p>
+
+          <!-- Progress bar -->
+          <div class="mc-progress-section">
+            <div class="mc-progress-track">
+              <div class="mc-progress-fill" [style.width.%]="getProgress(course.id)"></div>
+            </div>
+            <span class="mc-progress-pct">{{ getProgress(course.id) }}% complete</span>
+          </div>
+
+          <!-- Footer -->
+          <div class="mc-card-footer">
+            <div class="mc-rating" *ngIf="course.rating > 0">
+              <span class="star">★</span>
+              <span>{{ course.rating | number:'1.1-1' }}</span>
+            </div>
+            <button class="btn-continue" (click)="viewCourse(course.id); $event.stopPropagation()">
+              {{ getProgress(course.id) === 0 ? 'Start →' : getProgress(course.id) === 100 ? 'Review →' : 'Continue →' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EMPTY STATE ────────────────────────────────────────────────── -->
+    <div class="empty-panel reveal" *ngIf="!isLoading && filteredCourses.length === 0">
+      <div class="empty-emoji">📚</div>
+      <h3 class="empty-title">
+        {{ filterMode === 'all' ? 'No courses yet' : 'No courses match this filter' }}
+      </h3>
+      <p class="empty-sub" *ngIf="filterMode === 'all'">Start your learning journey by exploring the course catalogue.</p>
+      <p class="empty-sub" *ngIf="filterMode !== 'all'">Try a different filter above.</p>
+      <button class="btn-empty" (click)="filterMode === 'all' ? navigateToDiscovery() : setFilter('all')">
+        {{ filterMode === 'all' ? 'Browse Courses' : 'Show All' }}
+      </button>
+    </div>
+
+    <!-- ── PAGINATION ─────────────────────────────────────────────────── -->
+    <div class="pagination reveal" *ngIf="totalPages > 1 && !isLoading">
+      <button class="page-btn" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">← Prev</button>
+      <button
+        *ngFor="let p of getPageNumbers()"
+        class="page-btn" [class.active]="p === currentPage"
+        (click)="goToPage(p)">{{ p + 1 }}</button>
+      <button class="page-btn" [disabled]="currentPage === totalPages - 1" (click)="goToPage(currentPage + 1)">Next →</button>
+    </div>
+
+  </div><!-- /mycourses-body -->
+</div><!-- /mycourses-shell -->

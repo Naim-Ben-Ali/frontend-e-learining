@@ -1,0 +1,98 @@
+<div class="profile-page">
+  <app-navbar></app-navbar>
+
+  <section class="profile-shell">
+
+    <!-- Profile Header -->
+    <div class="profile-header-card reveal" [class.drag-over]="isDragOver">
+      <div class="profile-header-inner">
+        <div class="profile-header-left">
+          <span class="eyebrow">Teacher Profile</span>
+          <h1 class="profile-title">{{ profile?.firstName || 'Teacher' }} <em>{{ profile?.lastName || '' }}</em></h1>
+          <p class="profile-subtitle">Manage your identity and contact details shown to students.</p>
+        </div>
+        <div class="avatar-container">
+          <img
+            *ngIf="validatedProfilePictureUrl"
+            [src]="validatedProfilePictureUrl"
+            alt="Profile"
+            class="profile-avatar"
+            (onerror)="validatedProfilePictureUrl = null">
+          <div class="avatar-initials" *ngIf="!validatedProfilePictureUrl">
+            {{ (profile?.firstName || profile?.email || 'T').charAt(0).toUpperCase() }}
+          </div>
+          <input
+            #photoInput
+            type="file"
+            accept="image/*"
+            (change)="onProfilePhotoSelected($event)"
+            style="display: none;">
+          <button class="avatar-upload-btn" type="button" (click)="photoInput.click()" *ngIf="!isUploadingPhoto" title="Upload photo">
+            📷
+          </button>
+          <div class="upload-spinner" *ngIf="isUploadingPhoto">Uploading…</div>
+          <p class="avatar-hint">Drag & drop or click to upload</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Form Card -->
+    <div class="profile-card reveal" *ngIf="!isLoading; else loadingTpl">
+
+      <div *ngIf="errorMessage" class="alert error">
+        <span>⚠️</span> {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage" class="alert success">
+        <span>✓</span> {{ successMessage }}
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+        <label>
+          <span>First name</span>
+          <input formControlName="firstName" type="text" placeholder="Enter your first name">
+        </label>
+        <label>
+          <span>Last name</span>
+          <input formControlName="lastName" type="text" placeholder="Enter your last name">
+        </label>
+        <label>
+          <span>Email</span>
+          <input [value]="profile?.email || ''" type="email" readonly>
+        </label>
+        <label>
+          <span>Phone number</span>
+          <input formControlName="phoneNumber" type="text" placeholder="Enter your phone number">
+        </label>
+        <label>
+          <span>Date of birth</span>
+          <input formControlName="dateOfBirth" type="date">
+        </label>
+        <label class="full">
+          <span>Profile picture URL</span>
+          <input
+            formControlName="profilePictureUrl"
+            type="url"
+            placeholder="https://example.com/photo.jpg"
+            (change)="onProfilePictureUrlChange()"
+            pattern="https?://.*">
+        </label>
+
+        <div class="profile-meta">
+          <span *ngFor="let role of profile?.roles">{{ role.replace('ROLE_', '') }}</span>
+        </div>
+
+        <button type="submit" [disabled]="isSaving">
+          {{ isSaving ? 'Saving...' : 'Save changes' }}
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <ng-template #loadingTpl>
+    <section class="profile-shell">
+      <div class="profile-card">
+        <p>Loading profile...</p>
+      </div>
+    </section>
+  </ng-template>
+</div>

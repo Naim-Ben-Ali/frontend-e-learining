@@ -1,0 +1,362 @@
+<div class="teacher-calendar-container">
+  <app-navbar></app-navbar>
+  <div class="calendar-header">
+    <div class="header-top">
+      <button
+        mat-icon-button
+        (click)="goBackToDashboard()"
+        class="back-btn"
+        title="Back to Dashboard"
+      >
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h1 class="calendar-title">Calendar Management</h1>
+      <div class="header-spacer"></div>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="openCreateEventModal()"
+        [disabled]="isReadOnly"
+      >
+        <span class="material-icons">add</span>
+        New Event
+      </button>
+      <button
+        mat-icon-button
+        [matTooltip]="isReadOnly ? 'Enable Edit Mode' : 'Enable Read-Only Mode'"
+        (click)="toggleReadOnly()"
+        [class.active]="isReadOnly"
+      >
+        <span class="material-icons">{{ isReadOnly ? 'lock' : 'lock_open' }}</span>
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <div class="date-nav">
+        <button mat-icon-button (click)="navigatePrevious()" title="Previous period">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <div class="period-label">{{ visiblePeriodLabel }}</div>
+        <button mat-icon-button (click)="navigateNext()" title="Next period">
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+
+      <div class="view-switcher">
+        <button
+          mat-stroked-button
+          *ngFor="let view of availableViews"
+          (click)="switchView(view.view)"
+          [class.active]="currentView === view.view"
+          class="view-btn"
+        >
+          {{ view.displayName }}
+        </button>
+      </div>
+
+      <div class="toolbar-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="navigateToday()"
+          title="Go to Today"
+        >
+          <span class="material-icons">today</span>
+          Today
+        </button>
+
+        <button
+          mat-icon-button
+          (click)="exportToExcel()"
+          title="Export to CSV"
+        >
+          <span class="material-icons">download</span>
+        </button>
+
+        <button
+          mat-icon-button
+          (click)="exportToIcs()"
+          title="Export to iCal"
+        >
+          <span class="material-icons">event_available</span>
+        </button>
+
+        <button
+          mat-icon-button
+          (click)="printCalendar()"
+          title="Print Calendar"
+        >
+          <span class="material-icons">print</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="filter-bar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search events</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchQuery"
+          (input)="searchEvents()"
+          placeholder="Search by title, course, location..."
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Event Type</mat-label>
+        <mat-select
+          [(ngModel)]="filter.eventTypes"
+          multiple
+          (selectionChange)="applyFilter()"
+        >
+          <mat-option
+            *ngFor="let eventType of eventTypeOptions"
+            [value]="eventType.value"
+          >
+            {{ eventType.text }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Course</mat-label>
+        <mat-select
+          [(ngModel)]="filter.courseIds"
+          multiple
+          (selectionChange)="applyFilter()"
+        >
+          <mat-option *ngFor="let course of courses" [value]="course.id">
+            {{ course.title }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-checkbox
+        [(ngModel)]="filter.showOnlineOnly"
+        (change)="applyFilter()"
+        class="filter-checkbox"
+      >
+        Online Only
+      </mat-checkbox>
+
+      <mat-checkbox
+        [(ngModel)]="filter.showRequiredOnly"
+        (change)="applyFilter()"
+        class="filter-checkbox"
+      >
+        Required Only
+      </mat-checkbox>
+
+      <button
+        mat-stroked-button
+        (click)="clearFilters()"
+        class="clear-filter-btn"
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <div class="calendar-wrapper" *ngIf="!isLoading">
+    <div class="calendar-shell">
+      <section class="calendar-main">
+        <div class="month-view" *ngIf="currentView === 'Month'">
+          <div class="month-head">
+            <div class="week-label" *ngFor="let label of weekDayLabels">{{ label }}</div>
+          </div>
+          <div class="month-grid">
+            <article
+              class="day-cell"
+              *ngFor="let cell of monthCells"
+              [class.outside]="!cell.isCurrentMonth"
+              [class.today]="cell.isToday"
+              [class.selected]="cell.isSelected"
+              (click)="onSelectDate(cell.date)"
+              (dblclick)="openCreateEventModal(cell.date)"
+              (dragover)="allowDrop($event)"
+              (drop)="onDropToMonthCell($event, cell.date)"
+            >
+              <button class="day-number" type="button">
+                {{ cell.date.getDate() }}
+              </button>
+
+              <div class="day-events">
+                <button
+                  type="button"
+                  class="month-event"
+                  *ngFor="let event of getMonthCellEvents(cell)"
+                  [style.--event-color]="getEventColor(event.EventType)"
+                  (click)="openEditEventModal(event); $event.stopPropagation()"
+                  [draggable]="!isReadOnly"
+                  (dragstart)="onDragStart($event, event)"
+                  (dragend)="onDragEnd()"
+                >
+                  <span class="dot"></span>
+                  <span>{{ event.StartTime | date: 'shortTime' }} {{ event.Subject }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="more-events"
+                  *ngIf="getHiddenMonthCount(cell) > 0"
+                  (click)="onSelectDate(cell.date)"
+                >
+                  +{{ getHiddenMonthCount(cell) }} more
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="time-layout" *ngIf="currentView === 'Week' || currentView === 'WorkWeek' || currentView === 'Day'">
+
+          <!-- Sticky header row: empty corner + one header cell per day -->
+          <div class="time-header-row">
+            <div class="time-corner"></div>
+            <div class="day-col-header" *ngFor="let day of weekDays">
+              <div class="day-title">{{ day | date: 'EEE' }}</div>
+              <button class="day-date" (click)="onSelectDate(day)">{{ day | date: 'd MMM' }}</button>
+            </div>
+          </div>
+
+          <!-- Body: time labels on the left, day columns to the right -->
+          <div class="time-body">
+            <!-- Left: time labels -->
+            <div class="time-labels">
+              <div class="time-label" *ngFor="let hour of timeSlots">
+                {{ getDateTimeForSlot(selectedDate, hour) | date: 'HH:mm' }}
+              </div>
+            </div>
+
+            <!-- Right: one column per day -->
+            <div class="day-columns">
+              <div
+                class="day-column"
+                *ngFor="let day of weekDays"
+                [class.is-today]="isSameDate(day, today)"
+                (dblclick)="openCreateEventModal(getDateTimeForSlot(day, timeSlots[0]))"
+              >
+                <!-- Slot rows (background grid) -->
+                <div class="slots">
+                  <div
+                    class="slot"
+                    *ngFor="let hour of timeSlots"
+                    (dragover)="allowDrop($event)"
+                    (drop)="onDropToTimeCell($event, day, hour)"
+                  ></div>
+                </div>
+
+                <!-- Absolutely-positioned events layer -->
+                <div class="events-layer">
+                  <button
+                    type="button"
+                    class="time-event absolute-event"
+                    *ngFor="let event of getEventsForDate(day)"
+                    [style.--event-color]="getEventColor(event.EventType)"
+                    [ngStyle]="getAbsoluteEventStyle(event, day)"
+                    (click)="onTimeEventClick(event, $event)"
+                    [draggable]="!isReadOnly"
+                    (dragstart)="onDragStart($event, event)"
+                    (dragend)="onDragEnd()"
+                  >
+                    <span
+                      class="resize-handle top"
+                      *ngIf="!isReadOnly"
+                      (mousedown)="onResizeStart($event, event, 'start')"
+                      (click)="$event.stopPropagation()"
+                      title="Adjust start time"
+                    ></span>
+
+                    <div class="time-event-title">{{ event.Subject }}</div>
+                    <div class="time-event-meta">
+                      {{ event.StartTime | date: 'HH:mm' }} – {{ event.EndTime | date: 'HH:mm' }}
+                    </div>
+
+                    <span
+                      class="resize-handle bottom"
+                      *ngIf="!isReadOnly"
+                      (mousedown)="onResizeStart($event, event, 'end')"
+                      (click)="$event.stopPropagation()"
+                      title="Adjust end time"
+                    ></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="agenda-view" *ngIf="currentView === 'Agenda'">
+          <article class="agenda-item" *ngFor="let event of agendaEvents">
+            <div class="agenda-date">
+              <div class="agenda-day">{{ event.StartTime | date: 'EEE' }}</div>
+              <div class="agenda-num">{{ event.StartTime | date: 'd' }}</div>
+              <div class="agenda-month">{{ event.StartTime | date: 'MMM' }}</div>
+            </div>
+            <div class="agenda-content">
+              <div class="agenda-top">
+                <span
+                  class="agenda-type"
+                  [style.backgroundColor]="getEventTypeConfig(event.EventType).lightColor"
+                  [style.color]="getEventColor(event.EventType)"
+                >
+                  {{ getEventTypeConfig(event.EventType).label }}
+                </span>
+                <span class="agenda-time">
+                  {{ event.StartTime | date: 'HH:mm' }} - {{ event.EndTime | date: 'HH:mm' }}
+                </span>
+              </div>
+              <h3>{{ event.Subject }}</h3>
+              <p>{{ event.CourseTitle }} <span *ngIf="event.IsOnline">• {{ event.MeetingPlatform || 'Online' }}</span></p>
+            </div>
+            <button mat-icon-button (click)="openEditEventModal(event)" [disabled]="isReadOnly">
+              <span class="material-icons">edit</span>
+            </button>
+          </article>
+          <p *ngIf="agendaEvents.length === 0" class="empty-state">No upcoming events for current filters.</p>
+        </div>
+      </section>
+
+      <aside class="calendar-side">
+        <div class="side-card">
+          <h3>Selected Date</h3>
+          <div class="selected-date">{{ selectedDate | date: 'fullDate' }}</div>
+          <button mat-stroked-button (click)="openCreateEventModal(selectedDate)" [disabled]="isReadOnly">
+            <span class="material-icons">add_circle</span>
+            Add Event
+          </button>
+        </div>
+
+        <div class="side-card">
+          <h3>Events Today</h3>
+          <div class="mini-list">
+            <button
+              type="button"
+              class="mini-event"
+              *ngFor="let event of getEventsForDate(selectedDate)"
+              [style.--event-color]="getEventColor(event.EventType)"
+              (click)="openEditEventModal(event)"
+            >
+              <span class="dot"></span>
+              <span>{{ event.StartTime | date: 'shortTime' }} {{ event.Subject }}</span>
+            </button>
+            <p *ngIf="getEventsForDate(selectedDate).length === 0" class="empty-side">No events</p>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h3>Legend</h3>
+          <div class="legend-item" *ngFor="let eventType of availableEventTypes">
+            <span class="legend-dot" [style.background]="eventType.color"></span>
+            <span>{{ eventType.label }}</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>

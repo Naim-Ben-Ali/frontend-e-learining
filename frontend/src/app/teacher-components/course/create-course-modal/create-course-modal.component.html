@@ -1,0 +1,264 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <div class="modal-header">
+      <div class="header-inner">
+        <div class="header-left">
+          <h2>Create New Course</h2>
+          <p>Fill in the details below to publish your course</p>
+        </div>
+        <button class="close-btn" (click)="closeModal()" [disabled]="isLoading">✕</button>
+      </div>
+      <!-- Visual progress indicator -->
+      <div class="modal-steps">
+        <div class="step-dot done"></div>
+        <div class="step-dot" [class.done]="courseForm.get('education_level')?.value"></div>
+        <div class="step-dot" [class.done]="courseForm.get('subject')?.value"></div>
+      </div>
+    </div>
+
+    <!-- ── Body ───────────────────────────────────────────────────────── -->
+    <div class="modal-body">
+
+      <!-- Alerts -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <span class="alert-icon">⚠️</span>{{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage" class="alert alert-success">
+        <span class="alert-icon">🎉</span>{{ successMessage }}
+      </div>
+
+      <form [formGroup]="courseForm" (ngSubmit)="createCourse()" *ngIf="!successMessage">
+
+        <div class="smart-summary">
+          <div class="summary-card">
+            <span class="summary-label">Readiness</span>
+            <strong>{{ completionScore }}%</strong>
+            <p>Add a title, level, subject, description, and cover to make the course easier to discover.</p>
+          </div>
+          <div class="summary-card" *ngIf="suggestedGrades.length">
+            <span class="summary-label">Suggested grades</span>
+            <div class="grade-chip-row">
+              <button type="button" class="grade-chip" *ngFor="let grade of suggestedGrades" (click)="applySuggestedGrade(grade)">
+                {{ grade }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: Basic Info -->
+        <div class="form-section">
+          <div class="form-section-title">Basic Information</div>
+
+          <div class="form-group">
+            <label class="label-required">Course Title</label>
+            <input
+              type="text"
+              formControlName="title"
+              placeholder="e.g. Advanced Mathematics — Terminale"
+              class="form-input"
+              [class.has-error]="titleControl?.touched && titleControl?.invalid"
+            />
+            <div *ngIf="titleControl?.touched && titleControl?.invalid" class="error-message">
+              <span *ngIf="titleControl?.errors?.['required']">Course title is required</span>
+              <span *ngIf="titleControl?.errors?.['minlength']">At least 3 characters</span>
+              <span *ngIf="titleControl?.errors?.['maxlength']">Max 200 characters</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              formControlName="description"
+              placeholder="What will students learn? What topics are covered?"
+              class="form-textarea"
+              rows="4"
+              [class.has-error]="descriptionControl?.touched && descriptionControl?.invalid"
+            ></textarea>
+            <div *ngIf="descriptionControl?.touched && descriptionControl?.invalid" class="error-message">
+              <span *ngIf="descriptionControl?.errors?.['maxlength']">Max 2000 characters</span>
+            </div>
+            <div class="char-count">{{ descriptionControl?.value?.length || 0 }} / 2000</div>
+          </div>
+
+          <div class="form-group">
+            <label>Course Cover Image</label>
+
+            <!-- Drag and Drop Area or Image Preview -->
+            <div class="cover-image-area"
+                 [class.drag-over]="isDragOverCover"
+                 (dragenter)="onDragEnterCover($event)"
+                 (dragleave)="onDragLeaveCover($event)"
+                 (drop)="onDropCover($event)"
+                 *ngIf="!coverImagePreview">
+              <div class="drop-zone-content">
+                <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h4>Drag and drop your course cover here</h4>
+                <p>or</p>
+                <label class="file-input-label">
+                  Click to browse
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onCoverImageSelected($event)"
+                    class="hidden-file-input"
+                    [disabled]="isUploadingCover"
+                  />
+                </label>
+                <p class="file-hint">PNG, JPG or GIF (max 5MB)</p>
+              </div>
+            </div>
+
+            <!-- Image Preview with Remove Option -->
+            <div class="cover-preview" *ngIf="coverImagePreview">
+              <div class="preview-wrapper">
+                <img [src]="coverImagePreview" alt="Course cover preview" class="preview-image" />
+                <button type="button" class="btn-remove-cover" (click)="removeCoverImage()" title="Remove image">
+                  ✕
+                </button>
+              </div>
+              <div class="preview-actions">
+                <label class="btn-change-cover">
+                  Change Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onCoverImageSelected($event)"
+                    class="hidden-file-input"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="uploadCoverError" class="error-message">{{ uploadCoverError }}</div>
+
+            <!-- Hidden input for form value -->
+            <input
+              type="hidden"
+              formControlName="cover_image_url"
+              [value]="coverImagePreview ? 'local-image' : ''"
+            />
+          </div>
+        </div>
+
+        <!-- SECTION 2: Academic Info -->
+        <div class="form-section">
+          <div class="form-section-title">Academic Details</div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="label-required">Education Level</label>
+              <select
+                formControlName="education_level"
+                class="form-select"
+                [class.has-error]="educationLevelControl?.touched && educationLevelControl?.invalid"
+              >
+                <option value="">— Select Level —</option>
+                <option *ngFor="let level of educationLevels" [value]="level">
+                  {{ level | titlecase }}
+                </option>
+              </select>
+              <div *ngIf="educationLevelControl?.touched && educationLevelControl?.invalid" class="error-message">
+                <span>Education level is required</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Section</label>
+              <select formControlName="section" class="form-select">
+                <option *ngFor="let section of sections" [value]="section">
+                  {{ section | titlecase }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Specific Grade / Year</label>
+              <input
+                type="text"
+                formControlName="specific_grade"
+                placeholder="e.g. Bac, 9ème de base, 3ème"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="label-required">Subject</label>
+              <input
+                type="text"
+                formControlName="subject"
+                placeholder="e.g. Mathématiques, Physique"
+                class="form-input"
+                [class.has-error]="subjectControl?.touched && subjectControl?.invalid"
+              />
+              <div *ngIf="subjectControl?.touched && subjectControl?.invalid" class="error-message">
+                <span>Subject is required</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Pricing -->
+        <div class="form-section">
+          <div class="form-section-title">Pricing</div>
+
+          <div class="pricing-toggle">
+            <div class="pricing-option"
+                 [class.selected]="isFreeControl?.value"
+                 (click)="courseForm.get('is_free')?.setValue(true)">
+              <span class="pricing-icon">🆓</span>
+              <div>
+                <div>Free</div>
+                <div style="font-size:11px;font-weight:400;opacity:0.7">Open to all students</div>
+              </div>
+            </div>
+            <div class="pricing-option"
+                 [class.selected-paid]="!isFreeControl?.value"
+                 (click)="courseForm.get('is_free')?.setValue(false)">
+              <span class="pricing-icon">💰</span>
+              <div>
+                <div>Paid</div>
+                <div style="font-size:11px;font-weight:400;opacity:0.7">Set a custom price</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="!isFreeControl?.value">
+            <label>Price</label>
+            <input
+              type="number"
+              formControlName="price"
+              placeholder="0.00"
+              class="form-input"
+              step="0.01"
+              min="0"
+            />
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────── -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="isLoading">
+        Cancel
+      </button>
+      <button class="btn btn-primary"
+              (click)="createCourse()"
+              [disabled]="courseForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner"></span>
+        <span>{{ isLoading ? 'Creating…' : '🚀 Create Course' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>

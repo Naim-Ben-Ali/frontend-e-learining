@@ -1,0 +1,188 @@
+<div class="subscription-requests-shell">
+  <app-navbar></app-navbar>
+
+  <div class="subscription-requests-body">
+
+    <header class="sr-header reveal">
+      <div class="sr-header-inner">
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            Subscription Requests
+          </div>
+          <h1 class="sr-title">Manage <em class="title-em">Requests</em></h1>
+          <p class="sr-sub">Review and respond to student subscription key requests</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-refresh" (click)="loadPendingRequests()">
+            <span>R</span> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon-wrap" style="background:#EAF0FB">T</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ requests.length }}</div>
+            <div class="kpi-label">Total Requests</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon-wrap" style="background:#D4EDDF">A</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ approvedCount }}</div>
+            <div class="kpi-label">Approved</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon-wrap" style="background:#FAE9C3">P</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ pendingCount }}</div>
+            <div class="kpi-label">Pending</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-icon-wrap" style="background:#FAE3DC">D</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ deniedCount }}</div>
+            <div class="kpi-label">Denied</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-icon-wrap" style="background:#FAE3DC">B</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ blockedCount }}</div>
+            <div class="kpi-label">Blocked</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <span class="alert-icon">!</span> {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      <span class="alert-icon">OK</span> {{ successMessage }}
+    </div>
+
+    <div *ngIf="loading" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading requests...</p>
+    </div>
+
+    <div *ngIf="!loading && requests.length === 0" class="empty-panel reveal">
+      <div class="empty-emoji">T</div>
+      <h3 class="empty-title">No Requests Yet</h3>
+      <p class="empty-sub">You don't have any subscription key requests at the moment.</p>
+    </div>
+
+    <div *ngIf="!loading && requests.length > 0" class="requests-grid reveal rd1">
+      <div *ngFor="let request of requests" class="request-card" (click)="selectRequest(request)">
+        <div class="request-card-header">
+          <div class="student-info">
+            <div class="avatar">{{ request.studentName.charAt(0).toUpperCase() }}</div>
+            <div class="info">
+              <h3>{{ request.studentName }}</h3>
+              <p class="email">{{ request.studentEmail }}</p>
+            </div>
+          </div>
+          <span class="request-badge" [class.badge-pending]="request.status === 'PENDING'"
+                [class.badge-approved]="request.status === 'APPROVED'"
+                [class.badge-denied]="request.status === 'DENIED'"
+                [class.badge-blocked]="request.status === 'BLOCKED'">
+            {{ request.status }}
+          </span>
+        </div>
+
+        <div class="request-card-body">
+          <div class="course-info">
+            <span class="course-label">Course:</span>
+            <span class="course-name">{{ request.courseName }}</span>
+          </div>
+          <div class="request-time">
+            <span class="time-label">Requested:</span>
+            <span class="time-value">{{ getTimeAgo(request.createdDate) }}</span>
+          </div>
+          <div class="request-message" *ngIf="request.requestMessage">
+            <span class="message-label">Message:</span>
+            <p class="message-text">{{ request.requestMessage }}</p>
+          </div>
+        </div>
+
+        <div class="request-card-actions">
+          <button class="btn-approve" (click)="approveRequest(request); $event.stopPropagation();">
+            <span class="btn-icon">V</span> Approve
+          </button>
+          <button class="btn-deny" (click)="denyRequest(request); $event.stopPropagation();">
+            <span class="btn-icon">X</span> Deny
+          </button>
+          <button class="btn-block" (click)="blockRequest(request); $event.stopPropagation();">
+            <span class="btn-icon">B</span> Block
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="selectedRequest" class="modal-overlay" (click)="closeDetails()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Request Details</h2>
+          <button class="close-btn" (click)="closeDetails()">X</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-section">
+            <h3>Student Information</h3>
+            <div class="detail-row">
+              <span class="label">Name:</span>
+              <span class="value">{{ selectedRequest.studentName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Email:</span>
+              <span class="value">{{ selectedRequest.studentEmail }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Course Information</h3>
+            <div class="detail-row">
+              <span class="label">Course:</span>
+              <span class="value">{{ selectedRequest.courseName }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="selectedRequest.requestMessage">
+            <h3>Student Message</h3>
+            <p class="message-text">{{ selectedRequest.requestMessage }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Timeline</h3>
+            <div class="detail-row">
+              <span class="label">Requested:</span>
+              <span class="value">{{ selectedRequest.createdDate | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeDetails()">
+            Close
+          </button>
+          <button class="btn btn-deny" [disabled]="actionInProgress" (click)="denyRequest(selectedRequest)">
+            {{ actionInProgress ? 'Processing...' : 'Deny Request' }}
+          </button>
+          <button class="btn btn-block" [disabled]="actionInProgress" (click)="blockRequest(selectedRequest)">
+            {{ actionInProgress ? 'Processing...' : 'Block Student' }}
+          </button>
+          <button class="btn btn-approve" [disabled]="actionInProgress" (click)="approveRequest(selectedRequest)">
+            {{ actionInProgress ? 'Processing...' : 'Approve Request' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

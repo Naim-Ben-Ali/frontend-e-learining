@@ -1,0 +1,203 @@
+<!-- Custom Cursor -->
+<div class="cursor" [style.left.px]="curX" [style.top.px]="curY"></div>
+<div class="cursor-ring" [style.left.px]="ringX" [style.top.px]="ringY"></div>
+
+<!-- NAV -->
+<nav [class.scrolled]="isScrolled" [class.rtl]="isRTL">
+  <a class="nav-logo" routerLink="/"><div class="nav-logo-icon">🎓</div>Sahalli</a>
+  <div class="nav-cta">
+    <div class="lang-switcher">
+      <button class="lang-btn" [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" [class.active]="currentLang === 'fr'" (click)="switchLang('fr')">FR</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" [class.active]="currentLang === 'ar'" (click)="switchLang('ar')">ع</button>
+    </div>
+    <button class="btn-outline-nav" (click)="navigateToLogin()">{{ 'NAV.SIGN_IN' | translate }}</button>
+    <button class="btn-fill-nav" (click)="navigateToRegister()">{{ 'NAV.GET_STARTED' | translate }}</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-left">
+    <div class="hero-badge"><span class="badge-emoji">✨</span> {{ 'HERO.BADGE' | translate }}</div>
+    <h1 class="hero-title">
+      {{ 'HERO.TITLE_LEARN' | translate }} <em class="accent">{{ 'HERO.TITLE_ANYTHING' | translate }}</em>,<br>
+      <span class="underline-wrap">{{ 'HERO.TITLE_TEACH' | translate }}</span> {{ 'HERO.TITLE_EVERYONE' | translate }}
+    </h1>
+    <p class="hero-sub">{{ 'HERO.SUBTITLE' | translate }}</p>
+    <div class="hero-actions">
+      <button class="btn-hero-primary" (click)="navigateToRegister()">{{ 'HERO.CTA_PRIMARY' | translate }} <span class="btn-arrow">→</span></button>
+      <button class="btn-hero-secondary"><span class="play-ring"></span> {{ 'HERO.CTA_SECONDARY' | translate }}</button>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-avatars">
+        <div class="trust-avatar a1">A</div><div class="trust-avatar a2">S</div>
+        <div class="trust-avatar a3">M</div><div class="trust-avatar a4">R</div>
+      </div>
+      <p class="trust-text"><strong>{{ 'HERO.TRUST_RATING' | translate }}</strong> {{ 'HERO.TRUST_TEXT' | translate }}</p>
+    </div>
+  </div>
+  <div class="hero-right">
+    <canvas #heroCanvas id="hero-canvas"></canvas>
+    <div class="info-card ic1">
+      <div class="ic-label">{{ 'INFO_CARDS.ACTIVE_STUDENTS_LABEL' | translate }}</div>
+      <div class="ic-value">48,210</div>
+      <div class="ic-bar"><div class="ic-bar-fill" style="width:87%"></div></div>
+    </div>
+    <div class="info-card ic2">
+      <div class="ic-row"><div class="ic-dot" style="background:#22C55E"></div><div class="ic-label" style="margin:0">{{ 'INFO_CARDS.LIVE_LABEL' | translate }}</div></div>
+      <div class="ic-value">{{ 'INFO_CARDS.LIVE_COURSE' | translate }}</div>
+      <div class="ic-sub">{{ 'INFO_CARDS.LIVE_SUB' | translate }}</div>
+    </div>
+    <div class="info-card ic3">
+      <div class="ic-icon">🏅</div>
+      <div class="ic-label">{{ 'INFO_CARDS.CERT_LABEL' | translate }}</div>
+      <div class="ic-value">{{ 'INFO_CARDS.CERT_VALUE' | translate }}</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item reveal"><div class="stat-num">{{ 'STATS.LEARNERS_NUM' | translate }}</div><div class="stat-label">{{ 'STATS.LEARNERS_LABEL' | translate }}</div></div>
+  <div class="stat-bar-divider"></div>
+  <div class="stat-item reveal rd1"><div class="stat-num">{{ 'STATS.COURSES_NUM' | translate }}</div><div class="stat-label">{{ 'STATS.COURSES_LABEL' | translate }}</div></div>
+  <div class="stat-bar-divider"></div>
+  <div class="stat-item reveal rd2"><div class="stat-num">{{ 'STATS.COMPLETION_NUM' | translate }}</div><div class="stat-label">{{ 'STATS.COMPLETION_LABEL' | translate }}</div></div>
+  <div class="stat-bar-divider"></div>
+  <div class="stat-item reveal rd3"><div class="stat-num">{{ 'STATS.COUNTRIES_NUM' | translate }}</div><div class="stat-label">{{ 'STATS.COUNTRIES_LABEL' | translate }}</div></div>
+  <div class="stat-bar-divider"></div>
+  <div class="stat-item reveal rd4"><div class="stat-num">{{ 'STATS.RATING_NUM' | translate }}</div><div class="stat-label">{{ 'STATS.RATING_LABEL' | translate }}</div></div>
+</div>
+
+<!-- ROLES -->
+<section class="roles-section" id="roles">
+  <div class="roles-header">
+    <div class="sec-tag tag-blue reveal">{{ 'ROLES.TAG' | translate }}</div>
+    <h2 class="sec-title reveal rd1">{{ 'ROLES.TITLE_1' | translate }}<br><em>{{ 'ROLES.TITLE_2' | translate }}</em></h2>
+    <p class="sec-sub reveal rd2">{{ 'ROLES.SUBTITLE' | translate }}</p>
+  </div>
+  <div class="roles-grid">
+    <div class="role-card teacher reveal rd1">
+      <span class="role-icon-big">🧑‍🏫</span>
+      <div class="role-title">{{ 'ROLES.TEACHER_TITLE' | translate }}</div>
+      <p class="role-desc">{{ 'ROLES.TEACHER_DESC' | translate }}</p>
+      <ul class="role-features">
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F1' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F2' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F3' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F4' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F5' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.TEACHER_F6' | translate }}</li>
+      </ul>
+      <div class="role-bg-shape"></div>
+    </div>
+    <div class="role-card student reveal rd2">
+      <span class="role-icon-big">👩‍💻</span>
+      <div class="role-title">{{ 'ROLES.STUDENT_TITLE' | translate }}</div>
+      <p class="role-desc">{{ 'ROLES.STUDENT_DESC' | translate }}</p>
+      <ul class="role-features">
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F1' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F2' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F3' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F4' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F5' | translate }}</li>
+        <li><span class="check-icon">✓</span> {{ 'ROLES.STUDENT_F6' | translate }}</li>
+      </ul>
+      <div class="role-bg-shape"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-layout">
+    <div>
+      <div class="sec-tag tag-teal reveal">{{ 'FEATURES.TAG' | translate }}</div>
+      <h2 class="sec-title reveal rd1">{{ 'FEATURES.TITLE_1' | translate }} <em>{{ 'FEATURES.TITLE_ACCENT' | translate }}</em> {{ 'FEATURES.TITLE_2' | translate }}</h2>
+      <p class="sec-sub reveal rd2">{{ 'FEATURES.SUBTITLE' | translate }}</p>
+      <div style="margin-top:36px" class="reveal rd3">
+        <button class="btn-fill-nav" style="font-size:14px;padding:12px 28px">{{ 'FEATURES.EXPLORE_BTN' | translate }}</button>
+      </div>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card reveal rd1"><span class="feat-emoji">🔐</span><div class="feat-title">{{ 'FEATURES.F1_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F1_DESC' | translate }}</p></div>
+      <div class="feat-card reveal rd2"><span class="feat-emoji">🗝️</span><div class="feat-title">{{ 'FEATURES.F2_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F2_DESC' | translate }}</p></div>
+      <div class="feat-card reveal rd3"><span class="feat-emoji">📊</span><div class="feat-title">{{ 'FEATURES.F3_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F3_DESC' | translate }}</p></div>
+      <div class="feat-card reveal rd4"><span class="feat-emoji">✏️</span><div class="feat-title">{{ 'FEATURES.F4_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F4_DESC' | translate }}</p></div>
+      <div class="feat-card reveal rd5"><span class="feat-emoji">🏆</span><div class="feat-title">{{ 'FEATURES.F5_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F5_DESC' | translate }}</p></div>
+      <div class="feat-card reveal rd6"><span class="feat-emoji">💬</span><div class="feat-title">{{ 'FEATURES.F6_TITLE' | translate }}</div><p class="feat-desc">{{ 'FEATURES.F6_DESC' | translate }}</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-header">
+    <div class="sec-tag tag-amber reveal">{{ 'HOW.TAG' | translate }}</div>
+    <h2 class="sec-title reveal rd1">{{ 'HOW.TITLE_1' | translate }} <em>{{ 'HOW.TITLE_ACCENT' | translate }}</em></h2>
+    <p class="sec-sub reveal rd2">{{ 'HOW.SUBTITLE' | translate }}</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step reveal rd1"><div class="step-circle">🎓<span class="step-num">1</span></div><div class="step-title">{{ 'HOW.S1_TITLE' | translate }}</div><p class="step-desc">{{ 'HOW.S1_DESC' | translate }}</p></div>
+    <div class="step reveal rd2"><div class="step-circle">📚<span class="step-num">2</span></div><div class="step-title">{{ 'HOW.S2_TITLE' | translate }}</div><p class="step-desc">{{ 'HOW.S2_DESC' | translate }}</p></div>
+    <div class="step reveal rd3"><div class="step-circle">🔑<span class="step-num">3</span></div><div class="step-title">{{ 'HOW.S3_TITLE' | translate }}</div><p class="step-desc">{{ 'HOW.S3_DESC' | translate }}</p></div>
+    <div class="step reveal rd4"><div class="step-circle">🌟<span class="step-num">4</span></div><div class="step-title">{{ 'HOW.S4_TITLE' | translate }}</div><p class="step-desc">{{ 'HOW.S4_DESC' | translate }}</p></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <div class="cta-floating-emoji ce1">🧪</div><div class="cta-floating-emoji ce2">🔭</div>
+    <div class="cta-floating-emoji ce3">📐</div><div class="cta-floating-emoji ce4">🧬</div>
+    <div class="cta-title">{{ 'CTA.TITLE_1' | translate }}<br>{{ 'CTA.TITLE_2' | translate }}</div>
+    <p class="cta-sub">{{ 'CTA.SUBTITLE' | translate }}</p>
+    <div class="cta-btns">
+      <button class="btn-cta-white" (click)="navigateToRegister()">{{ 'CTA.BTN_PRIMARY' | translate }}</button>
+      <button class="btn-cta-ghost">{{ 'CTA.BTN_SECONDARY' | translate }}</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">🎓 Sahalli</div>
+      <p class="footer-brand-desc">{{ 'FOOTER.BRAND_DESC' | translate }}</p>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ 'FOOTER.COL_PLATFORM' | translate }}</div>
+      <ul class="footer-links">
+        <li><a href="#">{{ 'FOOTER.FEATURES' | translate }}</a></li><li><a href="#">{{ 'FOOTER.PRICING' | translate }}</a></li>
+        <li><a href="#">{{ 'FOOTER.LIBRARY' | translate }}</a></li><li><a href="#">{{ 'FOOTER.MOBILE' | translate }}</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ 'FOOTER.COL_RESOURCES' | translate }}</div>
+      <ul class="footer-links">
+        <li><a href="#">{{ 'FOOTER.DOCS' | translate }}</a></li><li><a href="#">{{ 'FOOTER.TEACHER_GUIDE' | translate }}</a></li>
+        <li><a href="#">{{ 'FOOTER.STUDENT_GUIDE' | translate }}</a></li><li><a href="#">{{ 'FOOTER.API' | translate }}</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ 'FOOTER.COL_COMPANY' | translate }}</div>
+      <ul class="footer-links">
+        <li><a href="#">{{ 'FOOTER.ABOUT' | translate }}</a></li><li><a href="#">{{ 'FOOTER.BLOG' | translate }}</a></li>
+        <li><a href="#">{{ 'FOOTER.CAREERS' | translate }}</a></li><li><a href="#">{{ 'FOOTER.CONTACT' | translate }}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">{{ 'FOOTER.COPYRIGHT' | translate }}</span>
+    <div style="display:flex;gap:20px">
+      <a href="#" class="footer-legal">{{ 'FOOTER.PRIVACY' | translate }}</a>
+      <a href="#" class="footer-legal">{{ 'FOOTER.TERMS' | translate }}</a>
+      <a href="#" class="footer-legal">{{ 'FOOTER.COOKIES' | translate }}</a>
+    </div>
+  </div>
+</footer>

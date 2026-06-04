@@ -1,0 +1,180 @@
+<div class="discovery-shell">
+  <app-student-navbar></app-student-navbar>
+
+  <div class="discovery-body">
+
+    <!-- ── HERO HEADER ─────────────────────────────────────────────── -->
+    <header class="disc-header reveal">
+      <div class="disc-header-inner">
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            Course Catalogue
+          </div>
+          <h1 class="disc-title">Discover &amp; <em class="title-em">Learn</em></h1>
+          <p class="disc-sub">Explore courses curated for your level and interests.</p>
+        </div>
+
+        <div class="search-block">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search courses, subjects, instructors…"
+              [value]="searchQuery"
+              (keyup)="onSearchInput($event)"
+              aria-label="Search courses">
+            <button class="filter-toggle" (click)="showFilters = !showFilters" [class.active]="showFilters">
+              <span>Filters</span>
+              <span class="filter-badge" *ngIf="activeFiltersCount > 0">{{ activeFiltersCount }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FILTER PANEL ─────────────────────────────────────────── -->
+      <div class="filters-panel" *ngIf="showFilters">
+        <div class="filter-group">
+          <label class="filter-label">Subject</label>
+          <select [(ngModel)]="selectedSubject" class="filter-select">
+            <option value="">All Subjects</option>
+            <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Education Level</label>
+          <select [(ngModel)]="selectedEducationLevel" class="filter-select">
+            <option value="">All Levels</option>
+            <option *ngFor="let level of educationLevels" [value]="level">{{ level }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Pricing</label>
+          <label class="checkbox-row">
+            <input type="checkbox" [checked]="isFreeFilter === true" (change)="onFreeFilterChange($event)">
+            <span class="checkbox-label">Free only</span>
+          </label>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-apply" (click)="applyFilters()">Apply</button>
+          <button class="btn-reset" (click)="resetFilters()">Reset</button>
+        </div>
+      </div>
+
+      <!-- ── TAB STRIP ───────────────────────────────────────────── -->
+      <div class="tab-strip">
+        <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="switchTab('all')">
+          Browse All
+        </button>
+      </div>
+    </header>
+
+    <!-- ── RECOMMENDATIONS ───────────────────────────────────────────── -->
+    <section class="rec-section reveal rd1"
+             *ngIf="showRecommendations && recommendations.length > 0 && activeTab === 'all'">
+      <div class="section-head">
+        <h2 class="section-title">⭐ Recommended For You</h2>
+        <span class="section-count">{{ recommendations.length }} picks</span>
+      </div>
+      <div class="rec-scroll">
+        <div *ngFor="let course of recommendations" class="rec-card" (click)="viewCourseDetails(course.id)">
+          <div class="rc-img-wrap">
+            <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="rc-img">
+            <span class="rc-price-badge" [class.free]="course.isFree">
+              {{ course.isFree ? 'Free' : '$' + course.price }}
+            </span>
+          </div>
+          <div class="rc-body">
+            <span class="rc-subject">{{ course.subject }}</span>
+            <h3 class="rc-title">{{ course.title }}</h3>
+            <p class="rc-teacher">by {{ course.teacherName }}</p>
+            <div class="rc-footer">
+              <span class="rc-stat" *ngIf="course.rating > 0">★ {{ course.rating | number:'1.1-1' }}</span>
+              <span class="rc-enroll">{{ course.enrollmentCount }} enrolled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── LOADING ────────────────────────────────────────────────────── -->
+    <div class="dash-loading" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Loading courses…</p>
+    </div>
+
+    <!-- ── ERROR ──────────────────────────────────────────────────────── -->
+    <div class="error-panel reveal" *ngIf="errorMessage && !isLoading">
+      <span class="error-icon">⚠️</span>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-retry" (click)="loadCourses()">Retry</button>
+    </div>
+
+    <!-- ── COURSES GRID ────────────────────────────────────────────────── -->
+    <section class="courses-section reveal rd2" *ngIf="!isLoading && !errorMessage">
+      <div class="section-head">
+        <h2 class="section-title">
+          {{ activeTab === 'enrolled' ? '📖 My Courses' : '🗂️ All Courses' }}
+        </h2>
+        <span class="section-count">{{ totalElements }} course{{ totalElements !== 1 ? 's' : '' }}</span>
+      </div>
+
+      <div class="courses-grid" *ngIf="courses.length > 0">
+        <div *ngFor="let course of courses" class="course-card" (click)="viewCourseDetails(course.id)">
+          <div class="card-img-wrap">
+            <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="card-img">
+            <div class="card-img-overlay"></div>
+            <span class="card-price" [class.free]="course.isFree">
+              {{ course.isFree ? 'Free' : '$' + course.price }}
+            </span>
+            <span class="enrolled-chip" *ngIf="course.isEnrolled">✓ Enrolled</span>
+            <span class="enroll-count-chip" *ngIf="course.enrollmentCount > 0 && !course.isEnrolled">
+              {{ course.enrollmentCount }} enrolled
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="tag tag-subj">{{ course.subject }}</span>
+              <span class="tag tag-level">{{ course.educationLevel }}</span>
+            </div>
+            <h3 class="card-title">{{ course.title }}</h3>
+            <p class="card-teacher">by {{ course.teacherName }}</p>
+            <p class="card-desc">{{ course.description | slice:0:90 }}{{ (course.description?.length || 0) > 90 ? '…' : '' }}</p>
+            <div class="card-footer">
+              <div class="card-rating" *ngIf="course.rating > 0">
+                <span class="star">★</span>
+                <span class="rating-val">{{ course.rating | number:'1.1-1' }}</span>
+                <span class="rating-count">({{ course.reviewCount }})</span>
+              </div>
+              <button class="btn-view" (click)="viewCourseDetails(course.id); $event.stopPropagation()">
+                View →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-panel" *ngIf="courses.length === 0">
+        <div class="empty-emoji">🔍</div>
+        <h3 class="empty-title">No courses found</h3>
+        <p class="empty-sub">Try adjusting your filters or search query.</p>
+        <button class="btn-empty" (click)="resetFilters()">Clear Filters</button>
+      </div>
+    </section>
+
+    <!-- ── PAGINATION ──────────────────────────────────────────────────── -->
+    <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+      <button class="page-btn" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">← Prev</button>
+      <button
+        *ngFor="let page of getPageNumbers()"
+        class="page-btn"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page + 1 }}
+      </button>
+      <button class="page-btn" [disabled]="currentPage === totalPages - 1" (click)="goToPage(currentPage + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>

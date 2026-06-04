@@ -1,0 +1,11 @@
+<h2 mat-dialog-title>{{ event?.Subject }}</h2>
+<mat-dialog-content>
+  <p><strong>When:</strong> {{ event?.StartTime | date:'EEE, d MMM yyyy, HH:mm' }} - {{ event?.EndTime | date:'HH:mm' }}</p>
+  <p *ngIf="event?.CourseTitle"><strong>Course:</strong> {{ event.CourseTitle }}</p>
+  <p *ngIf="event?.Location"><strong>Location:</strong> {{ event.Location }}</p>
+  <p *ngIf="event?.IsOnline"><strong>Meeting:</strong> {{ event.MeetingPlatform }} <a *ngIf="event?.MeetingLink" [href]="event.MeetingLink" target="_blank">Join</a></p>
+  <p *ngIf="event?.Description">{{ event.Description }}</p>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-stroked-button (click)="close()">Close</button>
+</mat-dialog-actions>

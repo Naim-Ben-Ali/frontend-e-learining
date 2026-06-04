@@ -1,0 +1,113 @@
+<div class="profile-page">
+  <app-student-navbar></app-student-navbar>
+
+  <div class="profile-shell">
+
+    <!-- ── HERO HEADER ─────────────────────────────────────────────── -->
+    <header class="profile-hero reveal">
+      <div class="profile-hero-left">
+        <div class="greeting-chip">
+          <span class="chip-dot"></span>
+          My Profile
+        </div>
+        <h1 class="profile-title">
+          Hello, <em>{{ profile?.firstName || 'Student' }}</em> 👋
+        </h1>
+        <p class="profile-sub">Manage your personal info and account settings.</p>
+        <div class="role-tags" *ngIf="profile?.roles?.length">
+          <span class="role-tag" *ngFor="let role of profile?.roles">
+            {{ role.replace('ROLE_', '') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="profile-avatar-hero">
+        <div class="avatar-ring" [class.drag-over]="isDragOver">
+          <img
+            *ngIf="validatedProfilePictureUrl"
+            [src]="validatedProfilePictureUrl"
+            alt="Profile picture"
+            class="avatar-img"
+            (onerror)="validatedProfilePictureUrl = null">
+          <div class="avatar-initials" *ngIf="!validatedProfilePictureUrl">
+            {{ (profile?.firstName || profile?.email || 'S').charAt(0).toUpperCase() }}
+          </div>
+          <input
+            #photoInput
+            type="file"
+            accept="image/*"
+            (change)="onProfilePhotoSelected($event)"
+            style="display: none;">
+          <button class="avatar-upload-btn" type="button" (click)="photoInput.click()" *ngIf="!isUploadingPhoto" title="Upload photo">
+            📷
+          </button>
+          <div class="upload-spinner" *ngIf="isUploadingPhoto">Uploading…</div>
+        </div>
+        <p class="avatar-hint">Drag & drop or click to upload</p>
+      </div>
+    </header>
+
+    <!-- ── LOADING ─────────────────────────────────────────────────── -->
+    <div *ngIf="isLoading" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading your profile…</p>
+    </div>
+
+    <!-- ── FORM CARD ───────────────────────────────────────────────── -->
+    <div class="profile-card reveal rd1" *ngIf="!isLoading">
+
+      <div *ngIf="errorMessage"   class="alert error">   ⚠ {{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="alert success"> ✓ {{ successMessage }}</div>
+
+      <div class="card-section-label">Personal Information</div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+
+        <div class="form-field">
+          <label>First name</label>
+          <input formControlName="firstName" type="text" placeholder="e.g. Alex">
+        </div>
+
+        <div class="form-field">
+          <label>Last name</label>
+          <input formControlName="lastName" type="text" placeholder="e.g. Johnson">
+        </div>
+
+        <div class="form-field">
+          <label>Email address</label>
+          <input [value]="profile?.email || ''" type="email" readonly>
+          <span class="field-hint">Email cannot be changed here.</span>
+        </div>
+
+        <div class="form-field">
+          <label>Phone number</label>
+          <input formControlName="phoneNumber" type="text" placeholder="+1 555 000 0000">
+        </div>
+
+        <div class="form-field">
+          <label>Date of birth</label>
+          <input formControlName="dateOfBirth" type="date">
+        </div>
+
+        <div class="form-field full">
+          <label>Profile picture URL</label>
+          <input
+            formControlName="profilePictureUrl"
+            type="url"
+            placeholder="https://…"
+            (change)="onProfilePictureUrlChange()"
+            pattern="https?://.*">
+          <span class="field-hint">Use a valid HTTPS image URL (https://example.com/image.jpg)</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save" [disabled]="isSaving">
+            {{ isSaving ? '⏳ Saving…' : '💾 Save changes' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

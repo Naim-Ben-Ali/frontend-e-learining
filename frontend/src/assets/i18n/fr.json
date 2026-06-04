@@ -1,0 +1,131 @@
+{
+  "NAV": {
+    "FEATURES": "Fonctionnalités",
+    "FOR_TEACHERS": "Pour les enseignants",
+    "FOR_STUDENTS": "Pour les étudiants",
+    "HOW_IT_WORKS": "Comment ça marche",
+    "TECH": "Technologie",
+    "SIGN_IN": "Se connecter",
+    "GET_STARTED": "Commencer gratuitement →"
+  },
+  "HERO": {
+    "BADGE": "Approuvé par 48 000+ apprenants dans le monde",
+    "TITLE_LEARN": "Apprendre",
+    "TITLE_ANYTHING": "n'importe quoi",
+    "TITLE_TEACH": "enseigner",
+    "TITLE_EVERYONE": "tout le monde",
+    "SUBTITLE": "Sahalli connecte des enseignants passionnés à des étudiants curieux à travers une plateforme d'apprentissage magnifiquement conçue. Cours, certificats et vrais progrès — tout en un seul endroit.",
+    "CTA_PRIMARY": "Commencer gratuitement",
+    "CTA_SECONDARY": "Voir comment ça marche",
+    "TRUST_RATING": "4,9 / 5",
+    "TRUST_TEXT": "parmi 6 200+ avis · Rejoignez-nous"
+  },
+  "INFO_CARDS": {
+    "ACTIVE_STUDENTS_LABEL": "Étudiants actifs",
+    "LIVE_LABEL": "En direct",
+    "LIVE_COURSE": "🧬 Biologie 101",
+    "LIVE_SUB": "312 étudiants regardent",
+    "CERT_LABEL": "Certificats délivrés aujourd'hui",
+    "CERT_VALUE": "+847"
+  },
+  "STATS": {
+    "LEARNERS_NUM": "48K+",
+    "LEARNERS_LABEL": "Apprenants actifs",
+    "COURSES_NUM": "3 200+",
+    "COURSES_LABEL": "Cours disponibles",
+    "COMPLETION_NUM": "94%",
+    "COMPLETION_LABEL": "Taux de complétion",
+    "COUNTRIES_NUM": "140+",
+    "COUNTRIES_LABEL": "Pays touchés",
+    "RATING_NUM": "4,9★",
+    "RATING_LABEL": "Note moyenne"
+  },
+  "ROLES": {
+    "TAG": "🎭 Deux rôles, une plateforme",
+    "TITLE_1": "Conçu pour les deux côtés",
+    "TITLE_2": "de la salle de classe",
+    "SUBTITLE": "Que vous partagiez votre expertise ou développiez de nouvelles compétences, Sahalli vous donne exactement les outils dont vous avez besoin.",
+    "TEACHER_TITLE": "Pour les enseignants",
+    "TEACHER_DESC": "Créez des cours engageants, gérez votre communauté d'étudiants et obtenez les analyses pour améliorer continuellement votre enseignement.",
+    "TEACHER_F1": "Créateur de cours glisser-déposer",
+    "TEACHER_F2": "Contrôle d'accès par clé de cours",
+    "TEACHER_F3": "Créateur de quiz multi-formats",
+    "TEACHER_F4": "Registre des étudiants & suivi des progrès",
+    "TEACHER_F5": "Tableau de bord d'analyse d'engagement",
+    "TEACHER_F6": "Modèles de certificats & émission",
+    "STUDENT_TITLE": "Pour les étudiants",
+    "STUDENT_DESC": "Découvrez des cours que vous aimez, suivez chaque étape de votre parcours d'apprentissage et obtenez des accréditations qui comptent vraiment.",
+    "STUDENT_F1": "Découverte de cours intelligente & filtres",
+    "STUDENT_F2": "S'inscrire via la clé de l'enseignant",
+    "STUDENT_F3": "Système de prise de notes intégré",
+    "STUDENT_F4": "Suivi visuel des progrès & carnet de notes",
+    "STUDENT_F5": "Portfolio de compétences téléchargeable",
+    "STUDENT_F6": "Apprentissage hors ligne"
+  },
+  "FEATURES": {
+    "TAG": "⚡ Fonctionnalités de la plateforme",
+    "TITLE_1": "Tout en un endroit",
+    "TITLE_ACCENT": "intelligent",
+    "TITLE_2": "",
+    "SUBTITLE": "Pas d'outils séparés. Pas d'applications à jongler. Sahalli est le système de gestion d'apprentissage complet que votre classe mérite.",
+    "EXPLORE_BTN": "Explorer toutes les fonctionnalités →",
+    "F1_TITLE": "Connexion multi-auth",
+    "F1_DESC": "E-mail, Google, GitHub, Facebook — avec 2FA pour chaque compte. Sécurisé dès le premier jour.",
+    "F2_TITLE": "Système de clé de cours",
+    "F2_DESC": "Générez des clés d'accès uniques avec dates d'expiration et limites d'utilisation. Parfait pour les cohortes privées.",
+    "F3_TITLE": "Analyses riches",
+    "F3_DESC": "Cartes thermiques, entonnoirs de complétion, tendances des quiz, rapports exportables. Sachez ce qui fonctionne.",
+    "F4_TITLE": "Éditeur de contenu riche",
+    "F4_DESC": "Équations LaTeX, blocs de code, vidéo intégrée, interactions H5P — tout dans un seul éditeur.",
+    "F5_TITLE": "Certificats & badges",
+    "F5_DESC": "Certificats générés automatiquement, vérifiés par QR. Les étudiants les partagent sur LinkedIn instantanément.",
+    "F6_TITLE": "Forums de discussion",
+    "F6_DESC": "Questions-réponses avec vote par les pairs. Les instructeurs peuvent mettre en avant les réponses officielles."
+  },
+  "HOW": {
+    "TAG": "🚀 Comment ça marche",
+    "TITLE_1": "Opérationnel en",
+    "TITLE_ACCENT": "quelques minutes",
+    "SUBTITLE": "Pas de configuration complexe. Pas de labyrinthe d'intégration. Inscrivez-vous et commencez à apprendre ou à enseigner immédiatement.",
+    "S1_TITLE": "Créer un compte",
+    "S1_DESC": "Inscrivez-vous en 30 secondes. Choisissez votre rôle : Enseignant, Étudiant ou les deux.",
+    "S2_TITLE": "Configurez votre espace",
+    "S2_DESC": "Créez votre premier cours ou parcourez des milliers de cours prêts à l'emploi.",
+    "S3_TITLE": "Partagez ou rejoignez",
+    "S3_DESC": "Les enseignants partagent des clés de cours. Les étudiants les saisissent pour un accès privé instantané.",
+    "S4_TITLE": "Apprenez & progressez",
+    "S4_DESC": "Suivez vos progrès, obtenez des certificats et constituez un portfolio de compétences vérifiées."
+  },
+  "TECH": {
+    "TAG": "🛠️ Technologie",
+    "TITLE_1": "Technologie de niveau entreprise,",
+    "TITLE_ACCENT": "d'une simplicité élégante",
+    "SUBTITLE": "Construit sur Angular et Spring Boot avec authentification JWT + OAuth2, conçu pour s'adapter à des millions d'apprenants sans effort.",
+    "COMPLETION_LABEL": "Taux de complétion",
+    "COMPLETION_SUB": "↑ 12% par rapport au mois dernier",
+    "COURSES_LABEL": "Cours actifs",
+    "COURSES_SUB": "Dans 14 catégories",
+    "SECURITY_LABEL": "Sécurité & Auth"
+  },
+  "CTA": {
+    "TITLE_1": "Prêt à embraser votre",
+    "TITLE_2": "amour de l'apprentissage ?",
+    "SUBTITLE": "Rejoignez 48 000+ apprenants et enseignants déjà sur Sahalli.\nGratuit pour commencer. Pas de carte de crédit nécessaire.",
+    "BTN_PRIMARY": "Créer un compte gratuit",
+    "BTN_SECONDARY": "Parcourir les cours"
+  },
+  "FOOTER": {
+    "BRAND_DESC": "Là où la curiosité rencontre la connaissance. من تونس للعالم — Une plateforme tunisienne pour les apprenants du monde entier.",
+    "COL_PLATFORM": "Plateforme",
+    "COL_RESOURCES": "Ressources",
+    "COL_COMPANY": "Entreprise",
+    "FEATURES": "Fonctionnalités", "PRICING": "Tarifs", "LIBRARY": "Bibliothèque de cours", "MOBILE": "Application mobile",
+    "DOCS": "Documentation", "TEACHER_GUIDE": "Guide enseignant", "STUDENT_GUIDE": "Guide étudiant", "API": "Référence API",
+    "ABOUT": "À propos", "BLOG": "Blog", "CAREERS": "Carrières", "CONTACT": "Contact",
+    "COPYRIGHT": "© 2025 Sahalli Learning. Fait avec ❤️ en Tunisie 🇹🇳.",
+    "PRIVACY": "Confidentialité", "TERMS": "Conditions", "COOKIES": "Cookies"
+  },
+  "LANG": {
+    "EN": "EN", "FR": "FR", "AR": "AR"
+  }
+}

@@ -1,0 +1,360 @@
+<div class="dash-shell">
+  <app-student-navbar></app-student-navbar>
+
+  <div class="dash-body">
+
+    <!-- ── HERO HEADER ─────────────────────────────────────────────── -->
+    <header class="dash-header reveal">
+      <div class="dash-header-inner">
+
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            Student Dashboard
+          </div>
+          <h1 class="dash-title">
+            {{ greeting }}, <em class="name-em">{{ userName }}</em>
+            <span class="greet-emoji">{{ greetingEmoji }}</span>
+          </h1>
+          <p class="dash-sub">Keep the momentum — your next lesson is waiting.</p>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-explore-courses" (click)="navigateToCourseDiscovery()">
+            <span class="plus-icon">🔍</span>
+            Browse Courses
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── KPI STRIP ──────────────────────────────────────────────── -->
+      <div class="kpi-strip">
+
+        <div class="kpi-card kpi-teal">
+          <div class="kpi-icon-wrap" style="background:#CCEDE9">📖</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ enrolledCourses.length }}</div>
+            <div class="kpi-label">Enrolled Courses</div>
+          </div>
+          <div class="kpi-trend kpi-up" *ngIf="enrolledCourses.length > 0">↑ Active</div>
+        </div>
+
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon-wrap" style="background:#EAF0FB">⭐</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ recommendations.length }}</div>
+            <div class="kpi-label">Recommended</div>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon-wrap" style="background:#FAE9C3">🔥</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ streakDays }}</div>
+            <div class="kpi-label">Day Streak</div>
+          </div>
+          <div class="kpi-trend kpi-up" *ngIf="streakDays > 0">Keep it up!</div>
+        </div>
+
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon-wrap" style="background:#D4EDDF">🎯</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ completedLessons }}</div>
+            <div class="kpi-label">Lessons Done</div>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-icon-wrap" style="background:#FAE3DC">⏱️</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ hoursLearned }}h</div>
+            <div class="kpi-label">Hours Learned</div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ── LOADING ─────────────────────────────────────────────────── -->
+    <div *ngIf="isLoadingCourses && isLoadingRecommendations" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading your dashboard…</p>
+    </div>
+
+    <!-- ── MAIN GRID ───────────────────────────────────────────────── -->
+    <section class="panel reveal rd3 analytics-section" *ngIf="!isLoadingCourses && enrolledCourses.length > 0">
+      <div class="panel-head">
+        <h2 class="panel-title">Chart Analytics</h2>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <div class="chart-title">Course Progress</div>
+          <div class="chart-canvas-wrap">
+            <canvas #studentProgressCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" *ngIf="subjectMap.length > 0">
+          <div class="chart-title">Subjects Mix</div>
+          <div class="chart-canvas-wrap doughnut-wrap">
+            <canvas #studentSubjectsCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Free vs Paid Enrollments</div>
+          <div class="chart-canvas-wrap doughnut-wrap">
+            <canvas #studentPricingCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Course Ratings Trend</div>
+          <div class="chart-canvas-wrap">
+            <canvas #studentRatingCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div *ngIf="!isLoadingCourses || !isLoadingRecommendations" class="main-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+
+        <!-- Continue Learning -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="panel-title">▶️ Continue Learning</h2>
+            <button class="panel-link" (click)="navigateToCourseDiscovery()">Browse all →</button>
+          </div>
+
+          <div *ngIf="isLoadingCourses" class="panel-loading">
+            <div class="loading-spinner sm"></div>
+            <p>Loading your courses…</p>
+          </div>
+
+          <div *ngIf="errorMessage && !isLoadingCourses" class="error-banner">
+            {{ errorMessage }}
+          </div>
+
+          <div *ngIf="!isLoadingCourses && enrolledCourses.length === 0" class="empty-state">
+            <div class="empty-emoji">📚</div>
+            <p class="empty-title">No Courses Yet</p>
+            <p class="empty-sub">Start your learning journey by exploring available courses.</p>
+            <button class="btn-empty" (click)="navigateToCourseDiscovery()">Browse Courses</button>
+          </div>
+
+          <div *ngIf="!isLoadingCourses && enrolledCourses.length > 0" class="course-bars">
+            <div
+              *ngFor="let course of enrolledCourses; let i = index"
+              class="course-bar-row"
+              (click)="viewCourseDetails(course.id)"
+            >
+              <div class="card-thumb">
+                <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="thumb-img">
+              </div>
+              <div class="cbar-info">
+                <div class="cbar-name">{{ course.title }}</div>
+                <div class="cbar-meta">
+                  <span class="cbar-tag">{{ course.subject }}</span>
+                  <span class="cbar-tag tag-level">{{ course.educationLevel }}</span>
+                  <span class="cbar-tag tag-free" *ngIf="course.isFree">Free</span>
+                  <span class="cbar-tag tag-paid" *ngIf="!course.isFree">Paid</span>
+                </div>
+                <div class="cbar-track">
+                  <div class="cbar-fill" [style.width.%]="getCourseProgress(course.id)"></div>
+                </div>
+                <div class="cbar-progress-label">{{ getCourseProgress(course.id) }}% complete</div>
+              </div>
+              <div class="cbar-action">
+                <button class="btn-continue" (click)="viewCourseDetails(course.id); $event.stopPropagation()">
+                  ▶
+                </button>
+                <span class="cbar-unit">by {{ course.teacherName }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recommended Courses -->
+        <section class="panel reveal rd1">
+          <div class="panel-head">
+            <h2 class="panel-title">⭐ Recommended For You</h2>
+            <button class="panel-link" (click)="navigateToCourseDiscovery()">See all →</button>
+          </div>
+
+          <div *ngIf="isLoadingRecommendations" class="panel-loading">
+            <div class="loading-spinner sm"></div>
+            <p>Finding recommendations…</p>
+          </div>
+
+          <div *ngIf="!isLoadingRecommendations && recommendations.length === 0" class="empty-state compact">
+            <div class="empty-emoji small">🔍</div>
+            <p class="empty-sub">Enroll in more courses to get personalized picks.</p>
+          </div>
+
+          <div *ngIf="!isLoadingRecommendations && recommendations.length > 0" class="recent-grid">
+            <div
+              *ngFor="let course of recommendations"
+              class="recent-card"
+              (click)="viewCourseDetails(course.id)"
+            >
+              <div class="rc-cover">
+                <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="rc-img">
+                <span class="rc-price" [class.rc-free]="course.isFree">
+                  {{ course.isFree ? 'Free' : '$' + course.price }}
+                </span>
+              </div>
+              <div class="rc-body">
+                <h3 class="rc-title">{{ course.title }}</h3>
+                <p class="rc-subject">{{ course.subject }}</p>
+                <div class="rc-footer">
+                  <span class="rc-stat">👤 {{ course.teacherName }}</span>
+                  <span class="rc-stat" *ngIf="course.rating > 0">★ {{ course.rating | number:'1.1-1' }}</span>
+                  <span class="rc-enroll-count">{{ course.enrollmentCount }} enrolled</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /left-col -->
+
+      <!-- RIGHT COLUMN -->
+      <aside class="right-col">
+
+        <!-- Learning Progress -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="panel-title">📊 My Progress</h2>
+          </div>
+
+          <div *ngIf="enrolledCourses.length === 0" class="empty-state compact">
+            <div class="empty-emoji small">📊</div>
+            <p class="empty-sub">Progress will appear once you enroll.</p>
+          </div>
+
+          <div *ngIf="enrolledCourses.length > 0" class="overview-stats">
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#CCEDE9">📖</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ enrolledCourses.length }}</div>
+                <div class="ov-lbl">Enrolled</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#D4EDDF">✅</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ completedLessons }}</div>
+                <div class="ov-lbl">Lessons Done</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#FAE9C3">🔥</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ streakDays }}</div>
+                <div class="ov-lbl">Day Streak</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#EAF0FB">⏱️</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ hoursLearned }}h</div>
+                <div class="ov-lbl">Hours</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-course progress bars -->
+          <div *ngIf="enrolledCourses.length > 0" class="subject-list" style="margin-top: 18px;">
+            <div *ngFor="let course of enrolledCourses.slice(0, 4)" class="subject-row">
+              <div class="subj-name" [title]="course.title">{{ course.title | slice:0:18 }}{{ course.title.length > 18 ? '…' : '' }}</div>
+              <div class="subj-track">
+                <div class="subj-fill teal-fill" [style.width.%]="getCourseProgress(course.id)"></div>
+              </div>
+              <div class="subj-count">{{ getCourseProgress(course.id) }}%</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Subject Breakdown -->
+        <section class="panel reveal rd1" *ngIf="subjectMap.length > 0">
+          <div class="panel-head">
+            <h2 class="panel-title">🧩 My Subjects</h2>
+          </div>
+          <div class="level-list">
+            <div *ngFor="let s of subjectMap" class="level-row">
+              <div class="level-dot" [style.background]="s.color"></div>
+              <div class="level-name">{{ s.subject }}</div>
+              <div class="level-badge" [style.background]="s.color + '1A'" [style.color]="s.color">
+                {{ s.count }} course{{ s.count > 1 ? 's' : '' }}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="panel reveal rd3 quick-actions-panel">
+          <div class="panel-head">
+            <h2 class="panel-title">⚡ Quick Actions</h2>
+          </div>
+          <div class="qa-list">
+            <button class="qa-btn" (click)="navigateToCourseDiscovery()">
+              <span class="qa-icon">🔍</span>
+              <div class="qa-body">
+                <div class="qa-title">Browse Courses</div>
+                <div class="qa-sub">Discover courses for your goals</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+            <button class="qa-btn" (click)="navigateToMyCourses()">
+              <span class="qa-icon">📖</span>
+              <div class="qa-body">
+                <div class="qa-title">My Courses</div>
+                <div class="qa-sub">View all enrolled courses</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+            <button class="qa-btn" (click)="enrollWithKey()">
+              <span class="qa-icon">🔑</span>
+              <div class="qa-body">
+                <div class="qa-title">Ask for Access</div>
+                <div class="qa-sub">Request subscription from a teacher</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Course Key Modal Trigger inline -->
+        <div class="course-key-panel panel reveal rd3" *ngIf="showKeyForm">
+          <div class="panel-head">
+            <h2 class="panel-title">🔑 Enter Course Key</h2>
+            <button class="panel-link" (click)="showKeyForm = false">✕ Close</button>
+          </div>
+          <div class="key-form-row">
+            <input
+              type="text"
+              class="key-input"
+              placeholder="Paste your course key here…"
+              [(ngModel)]="courseKey"
+              (keyup.enter)="submitCourseKey()"
+              aria-label="Course key">
+            <button class="btn-key-submit" (click)="submitCourseKey()" [disabled]="isEnrollingWithKey">
+              {{ isEnrollingWithKey ? '…' : 'Join' }}
+            </button>
+          </div>
+          <div class="key-success" *ngIf="keySuccessMessage">✓ {{ keySuccessMessage }}</div>
+          <div class="key-error"   *ngIf="keyErrorMessage">⚠ {{ keyErrorMessage }}</div>
+        </div>
+
+      </aside><!-- /right-col -->
+
+    </div><!-- /main-grid -->
+
+  </div><!-- /dash-body -->
+</div><!-- /dash-shell -->
+

@@ -1,0 +1,54 @@
+<div class="section-detail-page">
+  <app-navbar></app-navbar>
+
+  <section class="section-detail-shell" *ngIf="!isLoading && section; else loadingTpl">
+    <div class="section-header">
+      <button (click)="backToCourse()">Back to course</button>
+      <div>
+        <p class="eyebrow">Section workspace</p>
+        <h1>{{ section.title }}</h1>
+        <p>{{ section.description }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert error">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="alert success">{{ successMessage }}</div>
+
+    <div class="section-grid">
+      <div class="panel">
+        <h2>Existing content</h2>
+        <div class="content-brief" *ngFor="let content of section.contents">
+          <div>
+            <strong>{{ content.title }}</strong>
+            <p>{{ content.description || content.file_name || content.type }}</p>
+          </div>
+          <button (click)="deleteContent(content.id)">Delete</button>
+        </div>
+        <p *ngIf="!(section.contents?.length || 0)" class="empty">No content yet inside this section.</p>
+      </div>
+
+      <form class="panel" [formGroup]="contentForm" (ngSubmit)="addContent()">
+        <h2>Add content</h2>
+        <input type="file" (change)="onFileSelected($event)">
+        <input formControlName="title" type="text" placeholder="Content title">
+        <textarea formControlName="description" rows="3" placeholder="Description"></textarea>
+        <select formControlName="type">
+          <option value="DOCUMENT">Document</option>
+          <option value="VIDEO">Video</option>
+          <option value="LINK">Link</option>
+        </select>
+        <input formControlName="contentUrl" type="text" placeholder="Uploaded file path or external link">
+        <input formControlName="fileName" type="text" placeholder="File name">
+        <input formControlName="fileSize" type="text" placeholder="File size">
+        <input formControlName="orderIndex" type="number" min="0" placeholder="Order">
+        <button type="submit" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Add content to section' }}</button>
+      </form>
+    </div>
+  </section>
+
+  <ng-template #loadingTpl>
+    <section class="section-detail-shell">
+      <div class="panel">Loading section...</div>
+    </section>
+  </ng-template>
+</div>

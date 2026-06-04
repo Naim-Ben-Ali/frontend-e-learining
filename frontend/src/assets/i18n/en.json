@@ -1,0 +1,131 @@
+{
+  "NAV": {
+    "FEATURES": "Features",
+    "FOR_TEACHERS": "For Teachers",
+    "FOR_STUDENTS": "For Students",
+    "HOW_IT_WORKS": "How It Works",
+    "TECH": "Tech",
+    "SIGN_IN": "Sign in",
+    "GET_STARTED": "Get started free →"
+  },
+  "HERO": {
+    "BADGE": "Trusted by 48,000+ learners worldwide",
+    "TITLE_LEARN": "Learn",
+    "TITLE_ANYTHING": "anything",
+    "TITLE_TEACH": "teach",
+    "TITLE_EVERYONE": "everyone",
+    "SUBTITLE": "Sahalli connects passionate teachers with curious students through a beautifully crafted learning platform. Courses, certificates, and real progress — all in one place.",
+    "CTA_PRIMARY": "Start for free",
+    "CTA_SECONDARY": "Watch how it works",
+    "TRUST_RATING": "4.9 / 5",
+    "TRUST_TEXT": "from 6,200+ reviews · Join today"
+  },
+  "INFO_CARDS": {
+    "ACTIVE_STUDENTS_LABEL": "Active Students",
+    "LIVE_LABEL": "Live Now",
+    "LIVE_COURSE": "🧬 Biology 101",
+    "LIVE_SUB": "312 students watching",
+    "CERT_LABEL": "Certificates issued today",
+    "CERT_VALUE": "+847"
+  },
+  "STATS": {
+    "LEARNERS_NUM": "48K+",
+    "LEARNERS_LABEL": "Active Learners",
+    "COURSES_NUM": "3,200+",
+    "COURSES_LABEL": "Courses Available",
+    "COMPLETION_NUM": "94%",
+    "COMPLETION_LABEL": "Completion Rate",
+    "COUNTRIES_NUM": "140+",
+    "COUNTRIES_LABEL": "Countries Reached",
+    "RATING_NUM": "4.9★",
+    "RATING_LABEL": "Average Rating"
+  },
+  "ROLES": {
+    "TAG": "🎭 Two Roles, One Platform",
+    "TITLE_1": "Built for both sides",
+    "TITLE_2": "of the classroom",
+    "SUBTITLE": "Whether you're sharing expertise or building new skills, Sahalli gives you exactly the tools you need.",
+    "TEACHER_TITLE": "For Teachers",
+    "TEACHER_DESC": "Design engaging courses, manage your student community, and get the analytics to continuously improve your teaching.",
+    "TEACHER_F1": "Drag-and-drop course builder",
+    "TEACHER_F2": "Course key access control",
+    "TEACHER_F3": "Multi-format quiz creator",
+    "TEACHER_F4": "Student roster & progress tracking",
+    "TEACHER_F5": "Engagement analytics dashboard",
+    "TEACHER_F6": "Certificate templates & issuance",
+    "STUDENT_TITLE": "For Students",
+    "STUDENT_DESC": "Discover courses you love, track every step of your learning journey, and earn credentials that actually matter.",
+    "STUDENT_F1": "Smart course discovery & filters",
+    "STUDENT_F2": "Enroll via teacher-issued key",
+    "STUDENT_F3": "Built-in note-taking system",
+    "STUDENT_F4": "Visual progress & grade book",
+    "STUDENT_F5": "Downloadable skill portfolio",
+    "STUDENT_F6": "Offline learning support"
+  },
+  "FEATURES": {
+    "TAG": "⚡ Platform Features",
+    "TITLE_1": "Everything in one",
+    "TITLE_ACCENT": "smart",
+    "TITLE_2": "place",
+    "SUBTITLE": "No separate tools. No juggling apps. Sahalli is the complete learning management system your classroom deserves.",
+    "EXPLORE_BTN": "Explore all features →",
+    "F1_TITLE": "Multi-Auth Login",
+    "F1_DESC": "Email, Google, GitHub, Facebook — with 2FA for every account. Secure from day one.",
+    "F2_TITLE": "Course Key System",
+    "F2_DESC": "Generate unique access keys with expiry dates and usage limits. Perfect for private cohorts.",
+    "F3_TITLE": "Rich Analytics",
+    "F3_DESC": "Heat maps, completion funnels, quiz trends, exportable reports. Know what's working.",
+    "F4_TITLE": "Rich Content Editor",
+    "F4_DESC": "LaTeX equations, code blocks, embedded video, H5P interactions — all in one editor.",
+    "F5_TITLE": "Certificates & Badges",
+    "F5_DESC": "Auto-generated, QR-verified certificates. Students share to LinkedIn instantly.",
+    "F6_TITLE": "Discussion Boards",
+    "F6_DESC": "Threaded Q&A with peer voting. Instructors can highlight official answers."
+  },
+  "HOW": {
+    "TAG": "🚀 How It Works",
+    "TITLE_1": "Up and running in",
+    "TITLE_ACCENT": "minutes",
+    "SUBTITLE": "No complex setup. No onboarding maze. Just sign up and start learning or teaching right away.",
+    "S1_TITLE": "Create Account",
+    "S1_DESC": "Sign up in 30 seconds. Choose your role as Teacher, Student, or both.",
+    "S2_TITLE": "Set Up Your Space",
+    "S2_DESC": "Build your first course or browse thousands of ready-made ones to enroll in.",
+    "S3_TITLE": "Share or Join",
+    "S3_DESC": "Teachers share course keys. Students enter them for instant private access.",
+    "S4_TITLE": "Learn & Grow",
+    "S4_DESC": "Track progress, earn certificates, and build a portfolio of verified skills."
+  },
+  "TECH": {
+    "TAG": "🛠️ Technology",
+    "TITLE_1": "Enterprise-grade tech,",
+    "TITLE_ACCENT": "beautifully simple",
+    "SUBTITLE": "Built on Angular and Spring Boot with JWT + OAuth2 auth, designed to scale to millions of learners without breaking a sweat.",
+    "COMPLETION_LABEL": "Completion Rate",
+    "COMPLETION_SUB": "↑ 12% from last month",
+    "COURSES_LABEL": "Active Courses",
+    "COURSES_SUB": "Across 14 categories",
+    "SECURITY_LABEL": "Security & Auth"
+  },
+  "CTA": {
+    "TITLE_1": "Ready to ignite your",
+    "TITLE_2": "love of learning?",
+    "SUBTITLE": "Join 48,000+ learners and teachers already on Sahalli.\nFree to start. No credit card needed.",
+    "BTN_PRIMARY": "Create Free Account",
+    "BTN_SECONDARY": "Browse Courses"
+  },
+  "FOOTER": {
+    "BRAND_DESC": "Where curiosity meets knowledge. من تونس للعالم — A Tunisian platform for the world's learners.",
+    "COL_PLATFORM": "Platform",
+    "COL_RESOURCES": "Resources",
+    "COL_COMPANY": "Company",
+    "FEATURES": "Features", "PRICING": "Pricing", "LIBRARY": "Course Library", "MOBILE": "Mobile App",
+    "DOCS": "Documentation", "TEACHER_GUIDE": "Teacher Guide", "STUDENT_GUIDE": "Student Guide", "API": "API Reference",
+    "ABOUT": "About", "BLOG": "Blog", "CAREERS": "Careers", "CONTACT": "Contact",
+    "COPYRIGHT": "© 2025 Sahalli Learning. Made with ❤️ in Tunisia 🇹🇳.",
+    "PRIVACY": "Privacy", "TERMS": "Terms", "COOKIES": "Cookies"
+  },
+  "LANG": {
+    "EN": "EN", "FR": "FR", "AR": "AR"
+  }
+}

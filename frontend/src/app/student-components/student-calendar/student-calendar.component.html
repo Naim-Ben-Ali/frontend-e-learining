@@ -1,0 +1,239 @@
+<div class="student-calendar-container">
+  <app-student-navbar></app-student-navbar>
+
+  <!-- ── Header card (mirrors teacher's layout) ── -->
+  <div class="calendar-header">
+    <div class="header-top">
+      <h1 class="calendar-title">My Schedule</h1>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- ── Toolbar: nav + view switcher + actions ── -->
+    <div class="toolbar">
+      <div class="date-nav">
+        <button (click)="navigatePrevious()" title="Previous period">
+          <span class="material-icons" style="font-size:20px">chevron_left</span>
+        </button>
+        <div class="period-label">{{ visiblePeriodLabel }}</div>
+        <button (click)="navigateNext()" title="Next period">
+          <span class="material-icons" style="font-size:20px">chevron_right</span>
+        </button>
+      </div>
+
+      <div class="view-switcher">
+        <button
+          class="view-btn"
+          *ngFor="let view of availableViews"
+          [class.active]="currentView === view"
+          (click)="switchView(view)"
+        >
+          {{ view }}
+        </button>
+      </div>
+
+      <div class="toolbar-actions">
+        <button class="today-btn" (click)="navigateToday()">
+          <span class="material-icons" style="font-size:16px">today</span>
+          Today
+        </button>
+
+        <button class="icon-btn" (click)="exportToIcs()" title="Export to iCal">
+          <span class="material-icons" style="font-size:18px">event_available</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Filter bar (student-focused) ── -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="material-icons">search</span>
+        <input
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()"
+          placeholder="Search events, courses, locations…"
+        />
+      </div>
+
+      <button
+        class="filter-pill"
+        [class.active]="showRequiredOnly"
+        [class.required]="showRequiredOnly"
+        (click)="toggleRequiredFilter()"
+      >
+        <span class="material-icons" style="font-size:14px">priority_high</span>
+        Required Only
+      </button>
+
+      <button
+        class="filter-pill"
+        [class.active]="showOnlineOnly"
+        [class.online]="showOnlineOnly"
+        (click)="toggleOnlineFilter()"
+      >
+        <span class="material-icons" style="font-size:14px">videocam</span>
+        Online Only
+      </button>
+
+      <button
+        class="filter-pill"
+        (click)="clearFilters()"
+        *ngIf="searchQuery || showRequiredOnly || showOnlineOnly"
+      >
+        <span class="material-icons" style="font-size:14px">clear</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading state ── -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- ── Calendar body ── -->
+  <div class="calendar-wrapper" *ngIf="!isLoading">
+    <div class="calendar-shell">
+
+      <!-- ── Main calendar area ── -->
+      <section class="calendar-main">
+        <!-- Week / Day time-grid view -->
+        <div class="time-layout" *ngIf="currentView === 'Week' || currentView === 'Day'">
+
+          <!-- Sticky header row -->
+          <div class="time-header-row">
+            <div class="time-corner"></div>
+            <div class="day-col-header" *ngFor="let day of weekDays">
+              <div class="day-title">{{ day | date:'EEE' }}</div>
+              <button
+                class="day-date"
+                [class.is-today-num]="isSameDate(day, today)"
+              >
+                {{ day | date:'d' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Time body -->
+          <div class="time-body">
+            <div class="time-labels">
+              <div class="time-label" *ngFor="let slot of timeSlots">
+                {{ getDateTimeForSlot(selectedDate, slot) | date:'HH:mm' }}
+              </div>
+            </div>
+
+            <div class="day-columns">
+              <div
+                class="day-column"
+                *ngFor="let day of weekDays"
+                [class.is-today]="isSameDate(day, today)"
+              >
+                <!-- Background grid slots -->
+                <div class="slots">
+                  <div class="slot" *ngFor="let slot of timeSlots"></div>
+                </div>
+
+                <!-- Absolutely-positioned events -->
+                <div class="events-layer">
+                  <button
+                    type="button"
+                    class="time-event absolute-event"
+                    [class.is-required]="event.RequiredAttendance"
+                    [class.is-online]="event.IsOnline"
+                    *ngFor="let event of getEventsForDate(day)"
+                    [ngStyle]="getAbsoluteEventStyle(event, day)"
+                    (click)="openEvent(event)"
+                  >
+                    <div class="time-event-title">{{ event.Subject }}</div>
+                    <div class="time-event-meta">
+                      {{ event.StartTime | date:'HH:mm' }} – {{ event.EndTime | date:'HH:mm' }}
+                    </div>
+                    <div class="event-tags">
+                      <span class="event-tag required" *ngIf="event.RequiredAttendance">Required</span>
+                      <span class="event-tag online" *ngIf="event.IsOnline">Online</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="getEventsForDate(selectedDate).length === 0 && currentView === 'Day'" class="empty-state" style="padding: 48px 24px;">
+          No events scheduled for this day.
+        </div>
+      </section>
+
+      <!-- ── Sidebar ── -->
+      <aside class="calendar-side">
+
+        <!-- Attendance / streak card (student fingerprint) -->
+        <div class="attendance-card">
+          <h3>This Week</h3>
+          <div class="attendance-stat">
+            <span class="attendance-number">{{ getWeekEventCount() }}</span>
+            <span class="attendance-unit">events</span>
+          </div>
+          <div class="attendance-bar-bg">
+            <div class="attendance-bar-fill" [style.width.%]="getWeekAttendancePercent()"></div>
+          </div>
+          <div class="week-summary">
+            <span class="summary-pill total">
+              <span class="material-icons" style="font-size:12px">event</span>
+              {{ getWeekEventCount() }} total
+            </span>
+            <span class="summary-pill required" *ngIf="getWeekRequiredCount() > 0">
+              <span class="material-icons" style="font-size:12px">priority_high</span>
+              {{ getWeekRequiredCount() }} required
+            </span>
+            <span class="summary-pill online" *ngIf="getWeekOnlineCount() > 0">
+              <span class="material-icons" style="font-size:12px">videocam</span>
+              {{ getWeekOnlineCount() }} online
+            </span>
+          </div>
+        </div>
+
+        <!-- Selected date's events -->
+        <div class="side-card">
+          <h3>Selected Day</h3>
+          <div class="selected-date-display">{{ selectedDate | date:'EEE, d MMM' }}</div>
+          <div class="mini-list">
+            <button
+              type="button"
+              class="mini-event"
+              *ngFor="let event of getEventsForDate(selectedDate)"
+              [class.is-required]="event.RequiredAttendance"
+              [class.is-online]="event.IsOnline"
+              (click)="openEvent(event)"
+            >
+              <div>
+                <div class="mini-event-time">{{ event.StartTime | date:'HH:mm' }} – {{ event.EndTime | date:'HH:mm' }}</div>
+                <div class="mini-event-title">{{ event.Subject }}</div>
+              </div>
+            </button>
+            <p *ngIf="getEventsForDate(selectedDate).length === 0" class="empty-side">No events today</p>
+          </div>
+        </div>
+
+        <!-- Upcoming required events (student fingerprint) -->
+        <div class="side-card" *ngIf="getUpcomingRequiredEvents().length > 0">
+          <h3>Upcoming Required</h3>
+          <div class="mini-list">
+            <button
+              type="button"
+              class="mini-event is-required"
+              *ngFor="let event of getUpcomingRequiredEvents()"
+              (click)="openEvent(event)"
+            >
+              <div>
+                <div class="mini-event-time">{{ event.StartTime | date:'EEE d MMM, HH:mm' }}</div>
+                <div class="mini-event-title">{{ event.Subject }}</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</div>

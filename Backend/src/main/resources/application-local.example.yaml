@@ -1,0 +1,40 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 919697503782-b8e20vgjo81g0lkssdqaeh6bangqr9q6
+            client-secret: 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
+            scope: profile,email
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            client-name: Google
+          github:
+            client-id: Ov23liRnHe7oWETWetrQ
+            client-secret: 31f5e1ceaafc2529918eea19db5e8fb04d4fa045
+            scope: user:email
+            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            authorization-grant-type: authorization_code
+            client-name: GitHub
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+            user-name-attribute: email
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+
+app:
+  frontend:
+    base-url: ${FRONTEND_BASE_URL:http://localhost:4200}
+  security:
+    jwt:
+      access-token-expiration: 86400000 # 24 hours
+      refresh-token-expiration: 604800000 # 7 days
+    disposable-email: 10minutemail,20minutemail,33mail,5ymail,anonbox,guerrillamail,mailinator,maildrop,mailnesia,moakt,my10minutemail,throwawaymail,trashmail,temp-mail,tempmail,truemail,yopmail

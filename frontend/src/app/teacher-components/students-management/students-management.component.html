@@ -1,0 +1,127 @@
+<div class="students-shell">
+  <app-navbar></app-navbar>
+
+  <div class="students-body">
+    <header class="students-header reveal">
+      <div class="header-left">
+        <div class="greeting-chip">
+          <span class="chip-dot"></span>
+          Students Management
+        </div>
+        <h1 class="students-title">Manage <em class="title-em">Students</em></h1>
+        <p class="students-sub">Track enrolled learners across your courses and manage access quickly.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-refresh" (click)="loadStudentsData()">Refresh</button>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-value">{{ totalStudents }}</div>
+          <div class="kpi-label">Total Students</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">{{ totalEnrollments }}</div>
+          <div class="kpi-label">Enrollments</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">{{ activeCoursesWithStudents }}</div>
+          <div class="kpi-label">Courses With Students</div>
+        </div>
+      </div>
+    </header>
+
+    <div *ngIf="errorMessage" class="alert alert-error reveal">
+      <span>!</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success reveal">
+      <span>OK</span>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <div *ngIf="loading" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading students...</p>
+    </div>
+
+    <section class="students-panel reveal" *ngIf="!loading">
+      <div class="panel-toolbar">
+        <div class="search-wrap">
+          <input
+            class="search-input"
+            type="search"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilters()"
+            placeholder="Search by student name, email, or course..." />
+        </div>
+
+        <select class="course-filter" [(ngModel)]="selectedCourseId" (ngModelChange)="applyFilters()">
+          <option value="all">All Courses</option>
+          <option *ngFor="let course of courses" [value]="course.id">
+            {{ course.title }}
+          </option>
+        </select>
+      </div>
+
+      <div class="students-layout" *ngIf="filteredStudents.length > 0; else emptyState">
+        <div class="students-list">
+          <button
+            *ngFor="let student of filteredStudents"
+            class="student-item"
+            [class.active]="selectedStudent?.studentId === student.studentId"
+            (click)="selectStudent(student)">
+            <div class="avatar">{{ student.studentName.charAt(0).toUpperCase() }}</div>
+            <div class="student-meta">
+              <div class="student-name">{{ student.studentName }}</div>
+              <div class="student-email">{{ student.studentEmail }}</div>
+            </div>
+            <div class="enroll-count">{{ student.enrollmentsCount }}</div>
+          </button>
+        </div>
+
+        <div class="student-details" *ngIf="selectedStudent">
+          <div class="details-head">
+            <div class="details-avatar">{{ selectedStudent.studentName.charAt(0).toUpperCase() }}</div>
+            <div>
+              <h3>{{ selectedStudent.studentName }}</h3>
+              <p>{{ selectedStudent.studentEmail }}</p>
+            </div>
+          </div>
+
+          <div class="details-kpis">
+            <div class="mini-kpi">
+              <span class="mini-kpi-value">{{ selectedStudent.enrollmentsCount }}</span>
+              <span class="mini-kpi-label">Course Enrollments</span>
+            </div>
+            <div class="mini-kpi">
+              <span class="mini-kpi-value">{{ formatDate(selectedStudent.lastEnrolledDate) }}</span>
+              <span class="mini-kpi-label">Last Enrolled</span>
+            </div>
+          </div>
+
+          <div class="enrollment-list">
+            <div class="enrollment-row" *ngFor="let enrollment of selectedStudent.enrollments">
+              <div class="enrollment-info">
+                <div class="course-title">{{ enrollment.courseTitle }}</div>
+                <div class="enroll-date">Enrolled: {{ formatDate(enrollment.enrolledDate) }}</div>
+              </div>
+              <button class="btn-remove" (click)="removeEnrollment(selectedStudent, enrollment)">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <ng-template #emptyState>
+      <div class="empty-panel">
+        <div class="empty-emoji">U</div>
+        <h3>No students found</h3>
+        <p>Try changing the search text or course filter.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

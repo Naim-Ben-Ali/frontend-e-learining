@@ -1,0 +1,155 @@
+<div class="courses-container">
+  <app-navbar></app-navbar>
+<div class="courses-body">
+  <!-- ── Hero Header ──────────────────────────────────────────────────── -->
+  <div class="courses-hero">
+    <div class="hero-content">
+      <div class="hero-left">
+        <h2>My Courses</h2>
+        <p>Manage your courses and engage with students</p>
+      </div>
+      <button class="btn-create" (click)="openCreateCourseModal()">
+        <span class="icon">➕</span>
+        Create New Course
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-icon">📚</div>
+        <div>
+          <div class="hero-stat-val">{{ courseCount }}</div>
+          <div class="hero-stat-label">Courses</div>
+        </div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-icon">👥</div>
+        <div>
+          <div class="hero-stat-val">{{ totalStudents }}</div>
+          <div class="hero-stat-label">Total Students</div>
+        </div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-icon">📄</div>
+        <div>
+          <div class="hero-stat-val">{{ totalContent }}</div>
+          <div class="hero-stat-label">Content Items</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Error ────────────────────────────────────────────────────────── -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span class="alert-icon">⚠️</span>{{ errorMessage }}
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading your courses…</p>
+  </div>
+
+  <!-- ── Courses Grid ─────────────────────────────────────────────────── -->
+  <ng-container *ngIf="!isLoading && courses.length > 0">
+    <div class="section-label">Your Courses — {{ courseCount }}</div>
+
+    <div class="courses-grid">
+      <div
+        *ngFor="let course of courses; let i = index"
+        class="course-card"
+        (click)="navigateToCourse(course.id)"
+      >
+        <!-- Color accent bar — cycles through colour variants -->
+        <div class="card-thumb"
+             [class.thumb-teal]="i % 4 === 1"
+             [class.thumb-amber]="i % 4 === 2"
+             [class.thumb-green]="i % 4 === 3">
+        </div>
+
+        <div class="card-body">
+          <!-- Top row -->
+          <div class="card-top">
+            <div class="card-title-group">
+              <h3 class="course-title">{{ course.title }}</h3>
+              <span class="status-badge"
+                    [class.badge-active]="course.is_active"
+                    [class.badge-inactive]="!course.is_active">
+                {{ course.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <button class="delete-btn"
+                    (click)="deleteCourse(course.id, $event)"
+                    title="Delete course">🗑️</button>
+          </div>
+
+          <!-- Description -->
+          <p class="course-description">
+            {{ course.description || 'No description provided.' }}
+          </p>
+
+          <!-- Tags -->
+          <div class="card-tags">
+            <span class="tag tag-blue"
+                  *ngIf="course.education_level">
+              {{ course.education_level | titlecase }}
+            </span>
+            <span class="tag tag-amber"
+                  *ngIf="course.subject">
+              {{ course.subject }}
+            </span>
+            <span class="tag tag-green"
+                  *ngIf="course.is_free">Free</span>
+            <span class="tag"
+                  *ngIf="!course.is_free">{{ course.price | currency }}</span>
+          </div>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="stat-num">{{ course.student_count }}</span>
+            <span class="stat-lbl">Students</span>
+          </div>
+          <div class="card-stat">
+            <span class="stat-num">{{ course.content_count }}</span>
+            <span class="stat-lbl">Content</span>
+          </div>
+          <div class="card-stat">
+            <span class="stat-num">{{ course.created_date | date:'MMM d' }}</span>
+            <span class="stat-lbl">Created</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <div class="teacher-chip">
+            <div class="teacher-avatar">
+              {{ course.teacher_email?.charAt(0)?.toUpperCase() }}
+            </div>
+            <span class="teacher-email">{{ course.teacher_email }}</span>
+          </div>
+          <button class="view-btn">View →</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── Empty State ──────────────────────────────────────────────────── -->
+  <div *ngIf="!isLoading && courses.length === 0" class="empty-state">
+    <div class="empty-icon">📚</div>
+    <h3>No Courses Yet</h3>
+    <p>Create your first course to start teaching!</p>
+    <button class="btn-create" (click)="openCreateCourseModal()"
+            style="margin-top:8px">
+      <span class="icon">➕</span>
+      Create First Course
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- Create Course Modal -->
+<app-create-course-modal
+  (courseCreated)="onCourseCreated($event)">
+</app-create-course-modal>

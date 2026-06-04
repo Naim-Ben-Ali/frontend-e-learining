@@ -1,0 +1,265 @@
+<div class="subscription-responses-shell">
+  <app-student-navbar></app-student-navbar>
+
+  <div class="subscription-responses-body">
+
+    <!-- ── HEADER ────────────────────────────────────────────────────── -->
+    <header class="sr-header reveal">
+      <div class="sr-header-inner">
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            Subscription Responses
+          </div>
+          <h1 class="sr-title">My <em class="title-em">Requests</em></h1>
+          <p class="sr-sub">View teacher responses to your subscription key requests</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-explore" (click)="navigateToCourses()">
+            <span>🔍</span> Browse Courses
+          </button>
+        </div>
+      </div>
+
+      <!-- ── KPI STRIP ──────────────────────────────────────────────── -->
+      <div class="kpi-strip">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon-wrap" style="background:#EAF0FB">📬</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ responses.length }}</div>
+            <div class="kpi-label">Total Requests</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon-wrap" style="background:#D4EDDF">✓</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ getApprovedResponses().length }}</div>
+            <div class="kpi-label">Approved</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon-wrap" style="background:#FAE9C3">⏳</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ getPendingResponses().length }}</div>
+            <div class="kpi-label">Pending</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-icon-wrap" style="background:#FAE3DC">✕</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ getDeniedResponses().length }}</div>
+            <div class="kpi-label">Denied</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── ERROR MESSAGE ────────────────────────────────────────────── -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <span class="alert-icon">⚠️</span> {{ errorMessage }}
+    </div>
+
+    <!-- ── LOADING ────────────────────────────────────────────────────── -->
+    <div *ngIf="loading" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading your responses...</p>
+    </div>
+
+    <!-- ── EMPTY STATE ────────────────────────────────────────────────── -->
+    <div *ngIf="!loading && responses.length === 0" class="empty-panel reveal">
+      <div class="empty-emoji">📧</div>
+      <h3 class="empty-title">No Responses Yet</h3>
+      <p class="empty-sub">You haven't made any subscription key requests yet. Browse courses and request keys to get started!</p>
+      <button class="btn-empty" (click)="navigateToCourses()">
+        Browse Courses
+      </button>
+    </div>
+
+    <!-- ── RESPONSES BY STATUS ────────────────────────────────────────── -->
+    <div *ngIf="!loading && responses.length > 0" class="responses-container">
+
+      <!-- Approved section -->
+      <div *ngIf="getApprovedResponses().length > 0" class="status-section reveal">
+        <div class="section-header">
+          <span class="section-icon">✓</span>
+          <h2>Approved Requests</h2>
+          <span class="count-badge">{{ getApprovedResponses().length }}</span>
+        </div>
+
+        <div class="responses-grid">
+          <div *ngFor="let response of getApprovedResponses()" class="response-card approved" (click)="selectResponse(response)">
+            <div class="response-header">
+              <div class="course-info">
+                <div class="avatar">{{ response.courseName.charAt(0).toUpperCase() }}</div>
+                <div class="info">
+                  <h3>{{ response.courseName }}</h3>
+                  <p class="teacher">Teacher: {{ response.studentName }}</p>
+                </div>
+              </div>
+              <span class="status-badge approved-badge">Approved ✓</span>
+            </div>
+
+            <div class="response-body">
+              <p class="key-preview">Your subscription key is ready!</p>
+              <div class="key-box">
+                <code>{{ response.subscriptionKey?.substring(0, 8) }}****{{ response.subscriptionKey?.substring(response.subscriptionKey!.length - 4) }}</code>
+                <span class="key-icon">🔑</span>
+              </div>
+            </div>
+
+            <div class="response-footer">
+              <span class="timestamp">{{ getTimeAgo(response.respondedDate || response.createdDate) }}</span>
+              <button class="btn-view">View Details →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Denied section -->
+      <div *ngIf="getDeniedResponses().length > 0" class="status-section reveal rd1">
+        <div class="section-header">
+          <span class="section-icon">✕</span>
+          <h2>Denied Requests</h2>
+          <span class="count-badge denied">{{ getDeniedResponses().length }}</span>
+        </div>
+
+        <div class="responses-grid">
+          <div *ngFor="let response of getDeniedResponses()" class="response-card denied" (click)="selectResponse(response)">
+            <div class="response-header">
+              <div class="course-info">
+                <div class="avatar">{{ response.courseName.charAt(0).toUpperCase() }}</div>
+                <div class="info">
+                  <h3>{{ response.courseName }}</h3>
+                  <p class="teacher">Teacher: {{ response.studentName }}</p>
+                </div>
+              </div>
+              <span class="status-badge denied-badge">Denied ✕</span>
+            </div>
+
+            <div class="response-body">
+              <p class="message">Your subscription request was not approved.</p>
+            </div>
+
+            <div class="response-footer">
+              <span class="timestamp">{{ getTimeAgo(response.respondedDate || response.createdDate) }}</span>
+              <button class="btn-view">View Details →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending section -->
+      <div *ngIf="getPendingResponses().length > 0" class="status-section reveal rd2">
+        <div class="section-header">
+          <span class="section-icon">⏳</span>
+          <h2>Pending Requests</h2>
+          <span class="count-badge pending">{{ getPendingResponses().length }}</span>
+        </div>
+
+        <div class="responses-grid">
+          <div *ngFor="let response of getPendingResponses()" class="response-card pending" (click)="selectResponse(response)">
+            <div class="response-header">
+              <div class="course-info">
+                <div class="avatar">{{ response.courseName.charAt(0).toUpperCase() }}</div>
+                <div class="info">
+                  <h3>{{ response.courseName }}</h3>
+                  <p class="teacher">Teacher: {{ response.studentName }}</p>
+                </div>
+              </div>
+              <span class="status-badge pending-badge">Pending ⏳</span>
+            </div>
+
+            <div class="response-body">
+              <p class="message">Waiting for teacher response...</p>
+            </div>
+
+            <div class="response-footer">
+              <span class="timestamp">Requested {{ getTimeAgo(response.createdDate) }}</span>
+              <button class="btn-view">View Details →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DETAIL MODAL ───────────────────────────────────────────────── -->
+    <div *ngIf="selectedResponse" class="modal-overlay" (click)="closeDetails()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="header-content">
+            <div [class]="'status-indicator ' + getStatusClass(selectedResponse.status)">
+              {{ getStatusIcon(selectedResponse.status) }}
+            </div>
+            <h2>{{ selectedResponse.courseName }}</h2>
+          </div>
+          <button class="close-btn" (click)="closeDetails()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-section">
+            <h3>Course Information</h3>
+            <div class="detail-row">
+              <span class="label">Course:</span>
+              <span class="value">{{ selectedResponse.courseName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Teacher:</span>
+              <span class="value">{{ selectedResponse.studentName }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Request Status</h3>
+            <div class="detail-row">
+              <span class="label">Status:</span>
+              <span class="value" [class]="'status-text ' + getStatusClass(selectedResponse.status)">
+                {{ selectedResponse.status }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Requested:</span>
+              <span class="value">{{ selectedResponse.createdDate | date:'short' }}</span>
+            </div>
+            <div class="detail-row" *ngIf="selectedResponse.respondedDate">
+              <span class="label">Responded:</span>
+              <span class="value">{{ selectedResponse.respondedDate | date:'short' }}</span>
+            </div>
+          </div>
+
+          <!-- Approved section with key -->
+          <div *ngIf="selectedResponse.status === 'APPROVED'" class="detail-section">
+            <h3>Your Subscription Key</h3>
+            <div class="key-display">
+              <code class="key-code">{{ selectedResponse.subscriptionKey }}</code>
+              <button class="btn-copy" (click)="copySubscriptionKey(selectedResponse.subscriptionKey || '')">
+                {{ copiedKey === selectedResponse.subscriptionKey ? '✓ Copied!' : '📋 Copy Key' }}
+              </button>
+            </div>
+            <p class="key-hint">Use this key to access the course content.</p>
+          </div>
+
+          <!-- Denied section -->
+          <div *ngIf="selectedResponse.status === 'DENIED'" class="detail-section">
+            <div class="denial-message">
+              <p>Unfortunately, your subscription request was not approved by the teacher. You may try again later or contact the teacher for more information.</p>
+            </div>
+          </div>
+
+          <!-- Pending section -->
+          <div *ngIf="selectedResponse.status === 'PENDING'" class="detail-section">
+            <div class="pending-message">
+              <p>Your request is awaiting teacher approval. Please check back soon!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeDetails()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

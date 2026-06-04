@@ -1,0 +1,287 @@
+<div class="details-shell">
+  <app-student-navbar></app-student-navbar>
+
+  <!-- Loading -->
+  <div class="dash-loading" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Loading course details…</p>
+  </div>
+
+  <div class="details-body" *ngIf="!isLoading">
+
+    <!-- ── BACK ────────────────────────────────────────────────────── -->
+    <div class="back-row reveal">
+      <button class="back-btn" (click)="goBack()">
+        <span class="back-arrow">←</span> Back to Courses
+      </button>
+    </div>
+
+    <!-- ── ERROR STATE ─────────────────────────────────────────────── -->
+    <div class="error-panel reveal" *ngIf="errorMessage && !course">
+      <span class="error-icon">⚠️</span>
+      <h2>Unable to Load Course</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-retry" (click)="goBack()">Go Back</button>
+    </div>
+
+    <!-- ── COURSE CONTENT ─────────────────────────────────────────── -->
+    <div *ngIf="course">
+
+      <!-- ── HERO ───────────────────────────────────────────────────── -->
+      <div class="hero-grid reveal">
+
+        <!-- Cover image -->
+        <div class="hero-image">
+          <img [src]="getFullImageUrl(course.coverImageUrl)" [alt]="course.title" class="course-cover">
+          <div class="hero-img-overlay"></div>
+          <!-- Floating price badge on image -->
+          <div class="img-price-badge" [class.free]="course.isFree">
+            {{ course.isFree ? '🆓 Free' : '$' + course.price }}
+          </div>
+        </div>
+
+        <!-- Hero info panel -->
+        <div class="hero-info">
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <span class="crumb crumb-level">{{ course.educationLevel }}</span>
+            <span class="crumb-sep">›</span>
+            <span class="crumb crumb-subj">{{ course.subject }}</span>
+            <span class="crumb-sep" *ngIf="course.specificGrade">›</span>
+            <span class="crumb" *ngIf="course.specificGrade">{{ course.specificGrade }}</span>
+          </div>
+
+          <h1 class="course-title">{{ course.title }}</h1>
+
+          <!-- Teacher row -->
+          <div class="teacher-row">
+            <div class="teacher-avatar">{{ course.teacherName.charAt(0) }}</div>
+            <div>
+              <p class="teacher-name">{{ course.teacherName }}</p>
+              <p class="teacher-label">Instructor</p>
+            </div>
+          </div>
+
+          <!-- Stats strip -->
+          <div class="stats-strip">
+            <div class="stat-item">
+              <span class="stat-val">{{ course.enrollmentCount }}</span>
+              <span class="stat-lbl">Students</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item" *ngIf="course.rating > 0">
+              <span class="stat-val amber">{{ course.rating | number:'1.1-1' }} ★</span>
+              <span class="stat-lbl">{{ course.reviewCount }} Reviews</span>
+            </div>
+            <div class="stat-divider" *ngIf="course.rating > 0"></div>
+            <div class="stat-item">
+              <span class="stat-val" [class.teal]="course.isFree">
+                {{ course.isFree ? 'Free' : '$' + course.price }}
+              </span>
+              <span class="stat-lbl">Price</span>
+            </div>
+          </div>
+
+          <!-- Enrollment CTA -->
+          <div class="enroll-block" *ngIf="!course.isEnrolled">
+            <button class="btn-enroll" (click)="enrollCourse()" [disabled]="isRequestButtonDisabled()">
+              <span *ngIf="!isEnrolling">{{ getRequestButtonLabel() }} -></span>
+              <span *ngIf="isEnrolling" class="enrolling-dots">Enrolling…</span>
+            </button>
+
+
+          <div class="key-form-panel reveal" *ngIf="!course.isEnrolled && !course.isFree && requestStatus === 'APPROVED'">
+            <div class="key-form-header">
+              <h3>Subscription Approved - Enter Key</h3>
+            </div>
+            <div class="key-form-row">
+              <input
+                type="text"
+                class="key-input"
+                placeholder="Enter your subscription key"
+                [(ngModel)]="courseKey"
+                (keyup.enter)="enrollWithKey()"
+                aria-label="Subscription key">
+              <button class="btn-key-submit" (click)="enrollWithKey()" [disabled]="isEnrolling">
+                {{ isEnrolling ? '...' : 'Enroll' }}
+              </button>
+            </div>
+          </div></div>
+
+          <!-- Already enrolled -->
+          <div class="already-enrolled" *ngIf="course.isEnrolled && !isFromMyCourses">
+            <div class="enrolled-check">✓</div>
+            <div>
+              <p class="enrolled-label">You're enrolled</p>
+              <button class="btn-go" (click)="router.navigate(['/student/my-courses'])">
+                Go to My Courses →
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="success-banner" *ngIf="successMessage">✓ {{ successMessage }}</div>
+          <div class="error-banner"   *ngIf="errorMessage && course">⚠ {{ errorMessage }}</div>
+        </div>
+      </div>
+
+            <div class="tab-strip reveal">
+        <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
+          Overview
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'content'" (click)="switchTab('content')">
+          Course Content
+        </button>
+      </div>
+
+      <!-- ── OVERVIEW TAB ────────────────────────────────────────────── -->
+      <div class="tab-panel" *ngIf="activeTab === 'overview'">
+        <div class="tab-grid">
+
+          <!-- Left: Description + details -->
+          <div class="tab-left">
+            <section class="panel">
+              <h2 class="panel-title">About This Course</h2>
+              <p class="course-desc">{{ course.description }}</p>
+            </section>
+
+            <section class="panel">
+              <h2 class="panel-title">Course Details</h2>
+              <div class="details-grid">
+                <div class="detail-item">
+                  <span class="detail-lbl">Education Level</span>
+                  <span class="detail-val">{{ course.educationLevel }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-lbl">Subject</span>
+                  <span class="detail-val">{{ course.subject }}</span>
+                </div>
+                <div class="detail-item" *ngIf="course.specificGrade">
+                  <span class="detail-lbl">Grade / Year</span>
+                  <span class="detail-val">{{ course.specificGrade }}</span>
+                </div>
+                <div class="detail-item" *ngIf="course.section && course.section !== 'NONE'">
+                  <span class="detail-lbl">Section</span>
+                  <span class="detail-val">{{ course.section }}</span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right: What you'll learn -->
+          <aside class="tab-right">
+            <section class="panel outcomes-panel">
+              <h2 class="panel-title">What You'll Learn</h2>
+              <ul class="outcomes-list">
+                <li class="outcome-item">
+                  <span class="outcome-icon">✓</span>
+                  <span>Master core concepts and fundamentals</span>
+                </li>
+                <li class="outcome-item">
+                  <span class="outcome-icon">✓</span>
+                  <span>Practice with real-world exercises</span>
+                </li>
+                <li class="outcome-item">
+                  <span class="outcome-icon">✓</span>
+                  <span>Learn from an experienced instructor</span>
+                </li>
+                <li class="outcome-item">
+                  <span class="outcome-icon">✓</span>
+                  <span>Track your progress and achievements</span>
+                </li>
+                <li class="outcome-item">
+                  <span class="outcome-icon">✓</span>
+                  <span>Get access to course materials anytime</span>
+                </li>
+              </ul>
+
+              <!-- Enroll CTA inside sidebar -->
+              <div class="sidebar-enroll" *ngIf="!course.isEnrolled">
+                <button class="btn-enroll-side" (click)="enrollCourse()" [disabled]="isRequestButtonDisabled()">
+                  {{ isEnrolling ? 'Enrolling...' : getRequestButtonLabel() + ' ->' }}
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <!-- ── CONTENT TAB ─────────────────────────────────────────────── -->
+      <div class="tab-panel" *ngIf="activeTab === 'content'">
+
+        <!-- Locked state -->
+        <section class="panel content-locked-panel" *ngIf="!course.isEnrolled">
+          <div class="lock-icon">🔒</div>
+          <h3 class="lock-title">Content is locked</h3>
+          <p class="lock-sub">Enroll in this course to access all lessons, materials, and resources.</p>
+          <button class="btn-enroll" (click)="enrollCourse()" [disabled]="isRequestButtonDisabled()" style="align-self:center">
+            {{ isEnrolling ? 'Enrolling...' : (course.isFree ? 'Enroll Now ->' : getRequestButtonLabel() + ' ->') }}
+          </button>
+        </section>
+
+        <!-- Enrolled state - show sections and content -->
+        <div *ngIf="course.isEnrolled">
+
+          <!-- Loading sections -->
+          <div class="sections-loading" *ngIf="isLoadingSections">
+            <div class="loading-spinner"></div>
+            <p>Loading course content...</p>
+          </div>
+
+          <!-- No sections yet -->
+          <section class="panel empty-content-panel" *ngIf="!isLoadingSections && sections.length === 0">
+            <div class="empty-icon">📚</div>
+            <h3 class="empty-title">No content yet</h3>
+            <p class="empty-sub">The instructor hasn't added any content to this course yet.</p>
+          </section>
+
+          <!-- Sections with content -->
+          <div class="sections-container" *ngIf="!isLoadingSections && sections.length > 0">
+
+            <!-- Section card -->
+            <div class="section-card" *ngFor="let section of sections; let i = index">
+              <div class="section-header">
+                <div class="section-number">{{ i + 1 }}</div>
+                <div class="section-info">
+                  <h3 class="section-title">{{ section.title }}</h3>
+                  <p class="section-desc" *ngIf="section.description">{{ section.description }}</p>
+                </div>
+                <div class="section-count">
+                  {{ section.contents?.length || 0 }} {{ section.contents?.length === 1 ? 'lesson' : 'lessons' }}
+                </div>
+              </div>
+
+              <!-- Content items -->
+              <div class="content-list" *ngIf="section.contents && section.contents.length > 0">
+                <div class="content-item" *ngFor="let content of section.contents">
+                  <div class="content-icon">
+                    <span class="icon-emoji">{{ getContentIcon(content.type) }}</span>
+                  </div>
+                  <div class="content-info">
+                    <h4 class="content-title">{{ content.title }}</h4>
+                    <p class="content-desc" *ngIf="content.description">{{ content.description }}</p>
+                    <div class="content-meta" *ngIf="content.file_size || content.file_name">
+                      <span class="meta-tag" *ngIf="content.file_name">{{ content.file_name }}</span>
+                      <span class="meta-tag" *ngIf="content.file_size">{{ content.file_size }}</span>
+                    </div>
+                  </div>
+                  <button class="content-action-btn" (click)="openContent(content.content_url)" *ngIf="content.content_url">
+                    Open →
+                  </button>
+                </div>
+              </div>
+
+              <!-- Empty section -->
+              <div class="content-list empty" *ngIf="!section.contents || section.contents.length === 0">
+                <p class="empty-lesson-text">No lessons in this section yet.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /course content -->
+  </div><!-- /details-body -->
+</div><!-- /details-shell -->
+

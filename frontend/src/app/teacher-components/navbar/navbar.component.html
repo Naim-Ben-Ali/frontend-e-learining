@@ -1,0 +1,112 @@
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-left">
+      <a class="navbar-logo" routerLink="/teacher-dashboard">
+        <div class="logo-icon">📚</div>
+        <span class="logo-text">Sahalli</span>
+      </a>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-center">
+      <ul class="nav-list">
+        <li>
+          <a routerLink="/teacher-dashboard"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: true}"
+             class="nav-link">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/teacher-dashboard/courses"
+             routerLinkActive="active"
+             class="nav-link">
+            <span class="nav-icon">📖</span>
+            <span class="nav-text">My Courses</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/teacher-dashboard/calendar"
+             routerLinkActive="active"
+             class="nav-link">
+            <span class="nav-icon">📅</span>
+            <span class="nav-text">Calendar</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/teacher-dashboard/students"
+             routerLinkActive="active"
+             class="nav-link">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Students</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/teacher-dashboard/subscription"
+             routerLinkActive="active"
+             class="nav-link">
+            <span class="nav-icon">🔑</span>
+            <span class="nav-text">Subscription Key</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/teacher-dashboard/subscription-requests"
+             routerLinkActive="active"
+             class="nav-link">
+            <span class="nav-icon">📬</span>
+            <span class="nav-text">Requests</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right: Profile & Actions -->
+    <div class="navbar-right">
+      <div class="profile-dropdown" (clickOutside)="closeDropdown()">
+        <button
+          class="profile-btn"
+          (click)="toggleDropdown()"
+          [class.open]="dropdownOpen"
+          [attr.aria-haspopup]="true"
+          [attr.aria-expanded]="dropdownOpen">
+          <span class="user-avatar">{{ userInitial }}</span>
+          <span class="user-name">{{ userName }}</span>
+          <span class="chevron" [class.flipped]="dropdownOpen">▾</span>
+        </button>
+
+        <div class="dropdown-panel" *ngIf="dropdownOpen" role="menu">
+          <div class="dropdown-header">
+            <div class="dh-avatar">{{ userInitial }}</div>
+            <div class="dh-info">
+              <div class="dh-name">{{ userName }}</div>
+              <div class="dh-email">{{ userEmail }}</div>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item" routerLink="/teacher-dashboard/profile" (click)="closeDropdown()" role="menuitem">
+            <span class="di-icon">👤</span>
+            <div class="di-body">
+              <div class="di-label">My Profile</div>
+              <div class="di-sub">Edit your personal info</div>
+            </div>
+            <span class="di-arrow">→</span>
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item danger" (click)="logout()" role="menuitem">
+            <span class="di-icon">🚪</span>
+            <div class="di-body">
+              <div class="di-label">Sign Out</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

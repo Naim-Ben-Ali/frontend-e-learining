@@ -1,0 +1,375 @@
+<div class="dash-shell">
+  <app-navbar></app-navbar>
+
+  <div class="dash-body">
+
+    <!-- ── HERO HEADER ─────────────────────────────────────────────── -->
+    <header class="dash-header reveal">
+      <div class="dash-header-inner">
+
+        <div class="header-left">
+          <div class="greeting-chip">
+            <span class="chip-dot"></span>
+            Teacher Dashboard
+          </div>
+          <h1 class="dash-title">
+            {{ greeting }}, <em class="name-em">{{ userName }}</em>
+            <span class="greet-emoji">{{ greetingEmoji }}</span>
+          </h1>
+          <p class="dash-sub">Here's a live snapshot of your teaching activity.</p>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-new-course" (click)="navigateToCourses()">
+            <span class="plus-icon">＋</span>
+            Manage Courses
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── KPI STRIP ──────────────────────────────────────────────── -->
+      <div class="kpi-strip">
+
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon-wrap" style="background:#EAF0FB">📚</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ activeCourses }}</div>
+            <div class="kpi-label">Active Courses</div>
+          </div>
+          <div class="kpi-trend kpi-up" *ngIf="activeCourses > 0">↑ Live</div>
+        </div>
+
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon-wrap" style="background:#D4EDDF">👥</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ totalStudents }}</div>
+            <div class="kpi-label">Total Students</div>
+          </div>
+          <div class="kpi-trend kpi-up" *ngIf="totalStudents > 0">↑ Enrolled</div>
+        </div>
+
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon-wrap" style="background:#FAE9C3">📄</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ totalContent }}</div>
+            <div class="kpi-label">Content Items</div>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-teal">
+          <div class="kpi-icon-wrap" style="background:#CCEDE9">🆓</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ freeCourses }}</div>
+            <div class="kpi-label">Free Courses</div>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-icon-wrap" style="background:#FAE3DC">💰</div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ paidCourses }}</div>
+            <div class="kpi-label">Paid Courses</div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ── LOADING ─────────────────────────────────────────────────── -->
+    <div *ngIf="isLoading" class="dash-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading your dashboard…</p>
+    </div>
+
+    <!-- ── MAIN GRID ───────────────────────────────────────────────── -->
+    <section class="panel reveal rd3 analytics-section" *ngIf="!isLoading && courses.length > 0">
+      <div class="panel-head">
+        <h2 class="panel-title">Chart Analytics</h2>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="chart-card" *ngIf="topCourses.length > 0">
+          <div class="chart-title">Top Courses by Students</div>
+          <div class="chart-canvas-wrap">
+            <canvas #teacherStudentsCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Pricing and Status Mix</div>
+          <div class="chart-canvas-wrap doughnut-wrap">
+            <canvas #teacherPricingCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" *ngIf="topCourses.length > 0">
+          <div class="chart-title">Content per Top Course</div>
+          <div class="chart-canvas-wrap">
+            <canvas #teacherContentCanvas></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" *ngIf="subjectMap.length > 0">
+          <div class="chart-title">Subject Distribution</div>
+          <div class="chart-canvas-wrap doughnut-wrap">
+            <canvas #teacherSubjectsCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div *ngIf="!isLoading" class="main-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+
+        <!-- Top Courses by Students -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="panel-title">🏆 Top Courses by Students</h2>
+            <button class="panel-link" (click)="navigateToCourses()">View all →</button>
+          </div>
+
+          <div *ngIf="topCourses.length === 0" class="empty-state">
+            <div class="empty-emoji">📝</div>
+            <p class="empty-title">No courses yet</p>
+            <p class="empty-sub">Create your first course to see analytics here.</p>
+            <button class="btn-empty" (click)="navigateToCourses()">Create Course</button>
+          </div>
+
+          <div *ngIf="topCourses.length > 0" class="course-bars">
+            <div
+              *ngFor="let c of topCourses; let i = index"
+              class="course-bar-row"
+              (click)="navigateToCourse(c.id)"
+            >
+              <div class="cbar-rank">#{{ i + 1 }}</div>
+              <div class="cbar-info">
+                <div class="cbar-name">{{ c.title }}</div>
+                <div class="cbar-meta">
+                  <span class="cbar-tag">{{ c.subject }}</span>
+                  <span class="cbar-tag tag-level">{{ c.education_level | titlecase }}</span>
+                  <span class="cbar-tag" [class.tag-free]="c.is_free" [class.tag-paid]="!c.is_free">
+                    {{ c.is_free ? 'Free' : 'Paid' }}
+                  </span>
+                </div>
+                <div class="cbar-track">
+                  <div
+                    class="cbar-fill"
+                    [style.width.%]="totalStudents > 0 ? ((c.student_count || 0) / totalStudents * 100) : 0"
+                    [style.background]="i === 0 ? 'linear-gradient(90deg,var(--blue),var(--indigo))' :
+                                        i === 1 ? 'linear-gradient(90deg,var(--teal),#0ea58e)' :
+                                        i === 2 ? 'linear-gradient(90deg,var(--amber),#e8921c)' :
+                                        'linear-gradient(90deg,var(--muted2),var(--muted))'">
+                  </div>
+                </div>
+              </div>
+              <div class="cbar-students">
+                <span class="cbar-num">{{ c.student_count || 0 }}</span>
+                <span class="cbar-unit">students</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Subject Distribution -->
+        <section class="panel reveal rd1" *ngIf="subjectMap.length > 0">
+          <div class="panel-head">
+            <h2 class="panel-title">🧩 Subject Distribution</h2>
+          </div>
+          <div class="subject-list">
+            <div *ngFor="let s of subjectMap" class="subject-row">
+              <div class="subj-name">{{ s.subject }}</div>
+              <div class="subj-track">
+                <div class="subj-fill" [style.width.%]="s.pct"></div>
+              </div>
+              <div class="subj-count">{{ s.count }} course{{ s.count > 1 ? 's' : '' }}</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recent Courses -->
+        <section class="panel reveal rd2" *ngIf="recentCourses.length > 0">
+          <div class="panel-head">
+            <h2 class="panel-title">🕐 Recently Created</h2>
+            <button class="panel-link" (click)="navigateToCourses()">See all →</button>
+          </div>
+          <div class="recent-grid">
+            <div
+              *ngFor="let c of recentCourses"
+              class="recent-card"
+              (click)="navigateToCourse(c.id)"
+            >
+              <div class="rc-top">
+                <span class="rc-status" [class.rc-active]="c.is_active" [class.rc-inactive]="!c.is_active">
+                  {{ c.is_active ? 'Active' : 'Inactive' }}
+                </span>
+                <span class="rc-price" [class.rc-free]="c.is_free">
+                  {{ c.is_free ? 'Free' : (c.price | currency) }}
+                </span>
+              </div>
+              <h3 class="rc-title">{{ c.title }}</h3>
+              <p class="rc-subject">{{ c.subject }}</p>
+              <div class="rc-footer">
+                <span class="rc-stat">👥 {{ c.student_count || 0 }}</span>
+                <span class="rc-stat">📄 {{ c.content_count || 0 }}</span>
+                <span class="rc-date">{{ c.created_date | date:'MMM d' }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /left-col -->
+
+      <!-- RIGHT COLUMN -->
+      <aside class="right-col">
+
+        <!-- Education Level Breakdown -->
+        <section class="panel reveal">
+          <div class="panel-head">
+            <h2 class="panel-title">🎓 Education Levels</h2>
+          </div>
+
+          <div *ngIf="levelMap.length === 0" class="empty-state compact">
+            <div class="empty-emoji small">🎓</div>
+            <p class="empty-sub">No data yet.</p>
+          </div>
+
+          <div *ngIf="levelMap.length > 0" class="level-list">
+            <div *ngFor="let l of levelMap" class="level-row">
+              <div class="level-dot" [style.background]="l.color"></div>
+              <div class="level-name">{{ l.level | titlecase }}</div>
+              <div class="level-badge" [style.background]="l.color + '1A'" [style.color]="l.color">
+                {{ l.count }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Donut-style visual -->
+          <div *ngIf="levelMap.length > 0" class="level-donut-wrap">
+            <div class="level-donut">
+              <div class="donut-inner">
+                <div class="donut-num">{{ courses.length }}</div>
+                <div class="donut-lbl">courses</div>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div *ngFor="let l of levelMap" class="donut-legend-item">
+                <span class="legend-dot" [style.background]="l.color"></span>
+                {{ l.level | titlecase }} ({{ l.count }})
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Content Overview -->
+        <section class="panel reveal rd1">
+          <div class="panel-head">
+            <h2 class="panel-title">📊 Content Overview</h2>
+          </div>
+
+          <div *ngIf="courses.length === 0" class="empty-state compact">
+            <div class="empty-emoji small">📊</div>
+            <p class="empty-sub">Analytics will appear once you create courses.</p>
+          </div>
+
+          <div *ngIf="courses.length > 0" class="overview-stats">
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#EAF0FB">📚</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ courses.length }}</div>
+                <div class="ov-lbl">Total Courses</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#D4EDDF">✅</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ activeCourses }}</div>
+                <div class="ov-lbl">Active</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#FAE9C3">📄</div>
+              <div class="ov-body">
+                <div class="ov-val">{{ totalContent }}</div>
+                <div class="ov-lbl">Total Content</div>
+              </div>
+            </div>
+            <div class="ov-stat">
+              <div class="ov-icon" style="background:#CCEDE9">📈</div>
+              <div class="ov-body">
+                <div class="ov-val">
+                  {{ courses.length > 0 ? (totalContent / courses.length | number:'1.1-1') : 0 }}
+                </div>
+                <div class="ov-lbl">Avg. Content / Course</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini bar chart: content per course (top 5) -->
+          <div *ngIf="topCourses.length > 0" class="mini-chart">
+            <div class="mini-chart-label">Content items per course (top 5)</div>
+            <div class="mini-bars">
+              <div
+                *ngFor="let c of topCourses"
+                class="mini-bar-col"
+                [title]="c.title + ': ' + (c.content_count || 0) + ' items'"
+              >
+                <div
+                  class="mini-bar-fill"
+                  [style.height.%]="totalContent > 0 ? ((c.content_count || 0) / totalContent * 100) : 10"
+                ></div>
+                <div class="mini-bar-val">{{ c.content_count || 0 }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="panel reveal rd3 quick-actions-panel">
+          <div class="panel-head">
+            <h2 class="panel-title">⚡ Quick Actions</h2>
+          </div>
+          <div class="qa-list">
+            <button class="qa-btn" (click)="navigateToCalendar()">
+              <span class="qa-icon">📅</span>
+              <div class="qa-body">
+                <div class="qa-title">My Calendar</div>
+                <div class="qa-sub">Manage classes, sessions, and exams</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+            <button class="qa-btn" (click)="navigateToCourses()">
+              <span class="qa-icon">📚</span>
+              <div class="qa-body">
+                <div class="qa-title">My Courses</div>
+                <div class="qa-sub">Manage all your courses</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+            <button class="qa-btn" (click)="navigateToCourses()">
+              <span class="qa-icon">➕</span>
+              <div class="qa-body">
+                <div class="qa-title">Create Course</div>
+                <div class="qa-sub">Add a new course</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+            <button class="qa-btn" (click)="navigateToCourses()">
+              <span class="qa-icon">👥</span>
+              <div class="qa-body">
+                <div class="qa-title">View Students</div>
+                <div class="qa-sub">See enrolled students</div>
+              </div>
+              <span class="qa-arrow">→</span>
+            </button>
+          </div>
+        </section>
+
+      </aside><!-- /right-col -->
+
+    </div><!-- /main-grid -->
+
+  </div><!-- /dash-body -->
+</div><!-- /dash-shell -->

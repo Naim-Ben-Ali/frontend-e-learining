@@ -1,0 +1,594 @@
+<div class="course-detail-container">
+<div class="course-detail-body">
+  <!-- ── Hero Banner ──────────────────────────────────────────────────── -->
+  <div class="detail-hero" *ngIf="course || !isLoading">
+    <div class="hero-top">
+      <div>
+        <button class="back-btn" (click)="goBack()">← Back to Courses</button>
+      </div>
+      <div class="hero-action-btns" *ngIf="course && !showEditForm && activeTab === 'overview'">
+        <button class="btn-edit-hero" (click)="showEditForm = true">✏️ Edit Course</button>
+      </div>
+    </div>
+
+    <div style="position:relative;z-index:1;margin-bottom:20px" *ngIf="course">
+      <h1 class="hero-course-title">{{ course.title }}</h1>
+      <div class="hero-meta">
+        <span class="hero-meta-chip">
+          {{ course.is_active ? '🟢 Active' : '🔴 Inactive' }}
+        </span>
+        <span class="hero-meta-chip" *ngIf="course.education_level">
+          🎓 {{ course.education_level | titlecase }}
+        </span>
+        <span class="hero-meta-chip" *ngIf="course.subject">
+          📖 {{ course.subject }}
+        </span>
+        <span class="hero-meta-chip hero-price-chip" *ngIf="course.is_free">
+          Free
+        </span>
+        <span class="hero-meta-chip hero-price-chip is-paid" *ngIf="!course.is_free">
+          {{ (course.price ?? 0) | currency:undefined:'symbol':'1.2-2' }}
+        </span>
+        <span class="hero-meta-chip" style="opacity:0.7;font-size:11px">
+          Created {{ course.created_date | date:'mediumDate' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="hero-kpi-row" *ngIf="course">
+      <div class="hero-kpi">
+        <div class="hero-kpi-icon">👥</div>
+        <div>
+          <div class="hero-kpi-val">{{ course.student_count }}</div>
+          <div class="hero-kpi-lbl">Students</div>
+        </div>
+      </div>
+      <div class="hero-kpi">
+        <div class="hero-kpi-icon">📄</div>
+        <div>
+          <div class="hero-kpi-val">{{ course.content_count }}</div>
+          <div class="hero-kpi-lbl">Content Items</div>
+        </div>
+      </div>
+      <div class="hero-kpi" *ngIf="course.specific_grade">
+        <div class="hero-kpi-icon">🏫</div>
+        <div>
+          <div class="hero-kpi-val" style="font-size:15px;margin-top:3px">{{ course.specific_grade }}</div>
+          <div class="hero-kpi-lbl">Grade / Year</div>
+        </div>
+      </div>
+      <div class="hero-kpi">
+        <div class="hero-kpi-icon">👤</div>
+        <div>
+          <div class="hero-kpi-val" style="font-size:13px;margin-top:4px">{{ course.teacher_email }}</div>
+          <div class="hero-kpi-lbl">Teacher</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Alerts ───────────────────────────────────────────────────────── -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span class="alert-icon">⚠️</span>{{ errorMessage }}
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success">
+    <span class="alert-icon">✓</span>{{ successMessage }}
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading course details…</p>
+  </div>
+
+  <!-- ── Main Content Card ────────────────────────────────────────────── -->
+  <div *ngIf="!isLoading && course" class="detail-content">
+
+    <!-- Tab navigation -->
+    <div class="tabs-navigation">
+      <button class="tab-btn"
+              [class.active]="activeTab === 'overview'"
+              (click)="setActiveTab('overview')">
+        <span class="tab-icon">📝</span>
+        Overview
+      </button>
+      <button class="tab-btn"
+              [class.active]="activeTab === 'content'"
+              (click)="setActiveTab('content')">
+        <span class="tab-icon">📚</span>
+        Content
+        <span class="tab-count">{{ course.content_count }}</span>
+      </button>
+      <button class="tab-btn"
+              [class.active]="activeTab === 'students'"
+              (click)="setActiveTab('students')">
+        <span class="tab-icon">👥</span>
+        Students
+        <span class="tab-count">{{ course.student_count }}</span>
+      </button>
+    </div>
+
+    <div class="tabs-content">
+
+      <!-- ── OVERVIEW TAB ──────────────────────────────────────────────── -->
+      <div *ngIf="activeTab === 'overview'" class="tab-panel">
+
+        <!-- Edit form -->
+        <form [formGroup]="editForm" (ngSubmit)="updateCourse()"
+              *ngIf="showEditForm" class="edit-form">
+          <div class="edit-form-title">✏️ Edit Course Details</div>
+
+          <div class="form-grid-2">
+            <!-- Title -->
+            <div class="form-group full">
+              <label>Course Title *</label>
+              <input type="text" formControlName="title" class="form-input"
+                     [class.has-error]="editForm.get('title')?.touched && editForm.get('title')?.invalid"/>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group full">
+              <label>Description</label>
+              <textarea formControlName="description" class="form-textarea" rows="4"
+                        [class.has-error]="editForm.get('description')?.touched && editForm.get('description')?.invalid">
+              </textarea>
+            </div>
+
+            <!-- Cover Image -->
+            <div class="form-group full">
+              <label>Cover Image</label>
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <input type="text" formControlName="cover_image_url" class="form-input"
+                         placeholder="https://… or click Browse to upload"
+                         [readonly]="false"/>
+                </div>
+                <button type="button" class="btn btn-secondary" (click)="courseImageInputRef.click()" style="padding: 10px 18px; white-space: nowrap;">
+                  📷 Browse
+                </button>
+                <input type="file" #courseImageInputRef (change)="onCourseImageSelected($event)"
+                       accept="image/*" style="display: none;"/>
+              </div>
+              <p style="margin-top: 6px; font-size: 12px; color: var(--muted);">
+                Choose an image from your device or paste a URL
+              </p>
+              <!-- Image preview -->
+              <div *ngIf="courseImagePreview" style="margin-top: 12px;">
+                <img [src]="getFullImageUrl(courseImagePreview)" alt="Course cover preview"
+                     style="max-width: 200px; max-height: 150px; border-radius: var(--radius); object-fit: cover; border: 1px solid var(--border);"/>
+              </div>
+            </div>
+
+            <!-- Education Level -->
+            <div class="form-group">
+              <label>Education Level *</label>
+              <select formControlName="education_level" class="form-select"
+                      [class.has-error]="editForm.get('education_level')?.touched && editForm.get('education_level')?.invalid">
+                <option value="">— Select Level —</option>
+                <option *ngFor="let l of educationLevels" [value]="l">{{ l | titlecase }}</option>
+              </select>
+            </div>
+
+            <!-- Section -->
+            <div class="form-group">
+              <label>Section</label>
+              <select formControlName="section" class="form-select">
+                <option *ngFor="let s of sections" [value]="s">{{ s | titlecase }}</option>
+              </select>
+            </div>
+
+            <!-- Grade -->
+            <div class="form-group">
+              <label>Specific Grade / Year</label>
+              <input type="text" formControlName="specific_grade" class="form-input"
+                     placeholder="e.g. Bac, 9ème de base"/>
+            </div>
+
+            <!-- Subject -->
+            <div class="form-group">
+              <label>Subject *</label>
+              <input type="text" formControlName="subject" class="form-input"
+                     placeholder="e.g. Mathématiques"
+                     [class.has-error]="editForm.get('subject')?.touched && editForm.get('subject')?.invalid"/>
+            </div>
+
+            <!-- Pricing -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="is_free" class="form-checkbox"/>
+                Free Course
+              </label>
+            </div>
+
+            <div class="form-group" *ngIf="!editForm.get('is_free')?.value">
+              <label>Price</label>
+              <input type="number" formControlName="price" class="form-input"
+                     placeholder="0.00" step="0.01" min="0"/>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary"
+                    [disabled]="editForm.invalid || isSaving">
+              <span *ngIf="isSaving" class="spinner-small"></span>
+              {{ isSaving ? 'Saving…' : 'Save Changes' }}
+            </button>
+            <button type="button" class="btn btn-secondary"
+                    (click)="showEditForm = false">Cancel</button>
+          </div>
+        </form>
+
+        <!-- View mode info grid -->
+        <div *ngIf="!showEditForm" class="info-grid">
+          <!-- Cover image -->
+          <div class="info-item full-width cover-item">
+            <div class="cover-image-container">
+              <img *ngIf="course?.cover_image_url"
+                   [src]="getFullImageUrl(course.cover_image_url)"
+                   alt="Course Cover"
+                   class="cover-image"/>
+              <div *ngIf="!course?.cover_image_url" class="cover-image-placeholder">
+                <span class="cover-placeholder-icon">🖼️</span>
+                <span class="cover-placeholder-text">No cover image</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div class="info-item full-width">
+            <span class="info-label">Title</span>
+            <span class="info-value">{{ course?.title }}</span>
+          </div>
+
+          <!-- Description -->
+          <div class="info-item full-width" *ngIf="course?.description">
+            <span class="info-label">Description</span>
+            <span class="info-value">{{ course?.description }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Education Level</span>
+            <span class="info-value">{{ course?.education_level | titlecase }}</span>
+          </div>
+
+          <div class="info-item"
+               *ngIf="course?.section && course?.section !== 'NONE'">
+            <span class="info-label">Section</span>
+            <span class="info-value">{{ course?.section | titlecase }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="course?.specific_grade">
+            <span class="info-label">Grade / Year</span>
+            <span class="info-value">{{ course?.specific_grade }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Subject</span>
+            <span class="info-value">{{ course?.subject }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Pricing</span>
+            <span class="info-value">
+              <span *ngIf="course?.is_free" class="badge badge-success">Free</span>
+              <span *ngIf="!course?.is_free" class="badge badge-primary badge-price">{{ (course?.price ?? 0) | currency:undefined:'symbol':'1.2-2' }}</span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value" [class.status-active]="course?.is_active">
+              {{ course?.is_active ? '✓ Active' : '✗ Inactive' }}
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Teacher</span>
+            <span class="info-value">{{ course?.teacher_email }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ course?.created_date | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONTENT TAB ───────────────────────────────────────────────── -->
+      <div *ngIf="activeTab === 'content'" class="tab-panel content-tab-panel">
+
+        <div class="content-tab-toolbar">
+          <div class="content-tab-heading">
+            <h2>Course content</h2>
+            <p class="content-tab-sub">Create sections, then add lessons inside each section.</p>
+          </div>
+          <button type="button" class="btn-toolbar-add-section" (click)="openSectionForm()"
+                  *ngIf="!showSectionForm">
+            <span class="btn-ico">📚</span> Add section
+          </button>
+        </div>
+
+        <!-- Add section form -->
+        <form [formGroup]="sectionForm" (ngSubmit)="addSection()"
+              *ngIf="showSectionForm" class="content-form section-create-form">
+          <div class="content-form-title">New section</div>
+
+          <div class="form-group">
+            <label>Section title *</label>
+            <input type="text" formControlName="title" class="form-input"
+                   placeholder="e.g. Module 1 — Introduction"
+                   [class.has-error]="sectionForm.get('title')?.touched && sectionForm.get('title')?.invalid"/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea formControlName="description" class="form-textarea" rows="2"
+                      placeholder="What students will learn in this section…"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="sectionForm.invalid || isSaving">
+              {{ isSaving ? 'Creating…' : 'Create section' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="closeSectionForm()">Cancel</button>
+          </div>
+        </form>
+
+        <!-- Ungrouped lessons (legacy) -->
+        <div *ngIf="!showSectionForm && hasUngroupedContent && (!courseSections || courseSections.length === 0)" class="sections-container">
+          <div class="section-card section-card-ungrouped">
+            <div class="section-card-header-static">
+              <span class="section-eyebrow">Without section</span>
+              <h3 class="section-card-title">Ungrouped lessons</h3>
+              <p class="section-card-hint">These items are not in a section. New lessons should be added inside a section.</p>
+            </div>
+            <div class="section-card-body-inner">
+              <div class="content-list">
+                <div *ngFor="let content of ungroupedContents" class="content-item">
+                  <div class="content-icon-wrap"
+                       [class.icon-doc]="content.type === 'DOCUMENT'"
+                       [class.icon-video]="content.type === 'VIDEO'"
+                       [class.icon-link]="content.type === 'LINK'">
+                    <span *ngIf="content.type === 'DOCUMENT'">📄</span>
+                    <span *ngIf="content.type === 'VIDEO'">🎥</span>
+                    <span *ngIf="content.type === 'LINK'">🔗</span>
+                  </div>
+                  <div class="content-info">
+                    <div class="content-title">{{ content.title }}</div>
+                    <span class="content-type-badge" [class.type-doc]="content.type === 'DOCUMENT'"
+                          [class.type-video]="content.type === 'VIDEO'" [class.type-link]="content.type === 'LINK'">
+                      {{ content.type | titlecase }}
+                    </span>
+                    <p class="content-desc" *ngIf="content.description">{{ content.description }}</p>
+                  </div>
+                  <div class="content-actions">
+                    <a [href]="getFullImageUrl(content.content_url)" target="_blank" class="action-btn action-open">↗ Open</a>
+                    <button type="button" class="action-btn action-del" (click)="deleteContent(content.id)">🗑 Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sections (lessons live inside each section) -->
+        <div *ngIf="!showSectionForm && courseSections?.length" class="sections-container">
+          <div *ngFor="let section of courseSections; let sectionIndex = index" class="section-card">
+            <div class="section-card-header-row">
+              <button type="button" class="section-card-toggle" (click)="toggleSection(section.id)"
+                      [attr.aria-expanded]="isSectionExpanded(section.id)">
+                <span class="chevron" [class.chevron-open]="isSectionExpanded(section.id)">›</span>
+                <div class="section-card-heading-text">
+                  <span class="section-eyebrow">Section</span>
+                  <h3 class="section-card-title">{{ section.title }}</h3>
+                  <div class="section-card-meta">
+                    <span class="lesson-count-pill">{{ getSectionContents(section.id, sectionIndex).length }} lesson{{ getSectionContents(section.id, sectionIndex).length === 1 ? '' : 's' }}</span>
+                  </div>
+                  <!-- Collapsed: show lesson titles preview -->
+                  <div class="collapsed-lesson-preview" *ngIf="!isSectionExpanded(section.id) && getSectionContents(section.id, sectionIndex).length">
+                    <span *ngFor="let t of getSectionContentTitlePreview(section.id, sectionIndex)" class="preview-title-chip">{{ t }}</span>
+                    <span *ngIf="getSectionRemainingLessonCount(section.id, sectionIndex) > 0" class="preview-more">+{{ getSectionRemainingLessonCount(section.id, sectionIndex) }} more</span>
+                  </div>
+                </div>
+              </button>
+              <div class="section-card-actions" (click)="$event.stopPropagation()">
+                <button type="button" class="btn-section-add" (click)="openContentFormForSection(section.id)">
+                  <span>＋</span> Add lesson
+                </button>
+                <button type="button" class="btn-section-delete" (click)="deleteSection(section.id)" title="Delete section">🗑</button>
+              </div>
+            </div>
+
+            <div class="section-card-body" *ngIf="isSectionExpanded(section.id)">
+              <p class="section-card-description" *ngIf="section.description">{{ section.description }}</p>
+
+              <!-- New lesson form (only inside this section) -->
+              <form [formGroup]="contentForm" (ngSubmit)="addContent()"
+                    *ngIf="showContentForm && selectedSectionId === section.id"
+                    class="content-form nested-lesson-form">
+                <div class="content-form-title">New lesson in “{{ section.title }}”</div>
+
+                <div class="content-drag-drop-zone"
+                     (dragover)="onContentFormDragOver($event)"
+                     (dragleave)="onContentFormDragLeave($event)"
+                     (drop)="onContentFormDrop($event)"
+                     [class.drag-over]="isDragOverContent">
+                  <div class="drag-drop-content">
+                    <div class="upload-emoji">📤</div>
+                    <h4>Drop a file to attach</h4>
+                    <p>or</p>
+                    <button type="button" class="btn btn-sm btn-primary"
+                            (click)="contentFileInputRef.click()">
+                      Browse files
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Content type *</label>
+                  <div class="type-selector">
+                    <div class="type-option"
+                         [class.selected]="contentForm.get('type')?.value === 'DOCUMENT'"
+                         (click)="contentForm.get('type')?.setValue('DOCUMENT')">
+                      <span class="type-option-icon">📄</span>
+                      Document
+                    </div>
+                    <div class="type-option"
+                         [class.selected]="contentForm.get('type')?.value === 'VIDEO'"
+                         (click)="contentForm.get('type')?.setValue('VIDEO')">
+                      <span class="type-option-icon">🎥</span>
+                      Video
+                    </div>
+                    <div class="type-option"
+                         [class.selected]="contentForm.get('type')?.value === 'LINK'"
+                         (click)="contentForm.get('type')?.setValue('LINK')">
+                      <span class="type-option-icon">🔗</span>
+                      Link
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Lesson title *</label>
+                  <input type="text" formControlName="title" class="form-input"
+                         placeholder="e.g. Introduction video"
+                         [class.has-error]="contentForm.get('title')?.touched && contentForm.get('title')?.invalid"/>
+                </div>
+
+                <div class="form-group">
+                  <label>URL / file path *</label>
+                  <input type="text" formControlName="contentUrl" class="form-input"
+                         placeholder="Upload a file above or paste a link"
+                         [class.has-error]="contentForm.get('contentUrl')?.touched && contentForm.get('contentUrl')?.invalid"/>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>File name</label>
+                    <input type="text" formControlName="fileName" class="form-input" placeholder="Optional"/>
+                  </div>
+                  <div class="form-group">
+                    <label>File size</label>
+                    <input type="text" formControlName="fileSize" class="form-input" placeholder="Optional"/>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea formControlName="description" class="form-textarea" rows="3"
+                            placeholder="Short summary for students…"></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary"
+                          [disabled]="contentForm.invalid || isSaving">
+                    <span *ngIf="isSaving" class="spinner-small"></span>
+                    {{ isSaving ? 'Saving…' : 'Save lesson' }}
+                  </button>
+                  <button type="button" class="btn btn-secondary" (click)="closeContentForm()">Cancel</button>
+                </div>
+              </form>
+
+              <div class="section-lessons-wrap" *ngIf="getSectionContents(section.id, sectionIndex).length">
+                <div class="section-lessons-label">Lessons in this section</div>
+                <div class="content-list">
+                  <div *ngFor="let content of getSectionContents(section.id, sectionIndex)" class="content-item">
+                    <div class="content-icon-wrap"
+                         [class.icon-doc]="content.type === 'DOCUMENT'"
+                         [class.icon-video]="content.type === 'VIDEO'"
+                         [class.icon-link]="content.type === 'LINK'">
+                      <span *ngIf="content.type === 'DOCUMENT'">📄</span>
+                      <span *ngIf="content.type === 'VIDEO'">🎥</span>
+                      <span *ngIf="content.type === 'LINK'">🔗</span>
+                    </div>
+                    <div class="content-info">
+                      <div class="content-title">{{ content.title }}</div>
+                      <span class="content-type-badge" [class.type-doc]="content.type === 'DOCUMENT'"
+                            [class.type-video]="content.type === 'VIDEO'" [class.type-link]="content.type === 'LINK'">
+                        {{ content.type | titlecase }}
+                      </span>
+                      <p class="content-desc" *ngIf="content.description">{{ content.description }}</p>
+                    </div>
+                    <div class="content-actions">
+                      <a [href]="getFullImageUrl(content.content_url)" target="_blank" class="action-btn action-open">↗ Open</a>
+                      <button type="button" class="action-btn action-del" (click)="deleteContent(content.id)">🗑 Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-empty-lessons"
+                   *ngIf="!getSectionContents(section.id, sectionIndex).length && !(showContentForm && selectedSectionId === section.id)">
+                <p>No lessons yet. Use <strong>Add lesson</strong> to create the first one in this section.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty: no sections -->
+        <div *ngIf="!showSectionForm && (!courseSections || courseSections.length === 0) && !hasUngroupedContent"
+             class="empty-state content-empty-state">
+          <div class="empty-icon">📚</div>
+          <h3>Build your course structure</h3>
+          <p>Create a section first. You’ll add lessons inside each section.</p>
+          <button type="button" class="btn btn-primary empty-cta" (click)="openSectionForm()">
+            <span>📚</span> Add section
+          </button>
+        </div>
+
+        <input type="file" #contentFileInputRef (change)="onContentFileInputChange($event)"
+               accept="*/*" class="visually-hidden" tabindex="-1" aria-hidden="true"/>
+      </div>
+
+      <!-- ── STUDENTS TAB ──────────────────────────────────────────────── -->
+      <div *ngIf="activeTab === 'students'" class="tab-panel">
+
+        <div class="section-header">
+          <h2>Enrolled Students</h2>
+          <span class="count-pill">{{ enrollments.length }} students</span>
+        </div>
+
+        <!-- Students table -->
+        <div *ngIf="enrollments && enrollments.length > 0"
+             class="students-table-wrap">
+          <div class="table-head">
+            <div class="th">Email</div>
+            <div class="th">Name</div>
+            <div class="th">Enrolled</div>
+            <div class="th" style="text-align:right">Action</div>
+          </div>
+
+          <div class="table-body">
+            <div *ngFor="let e of enrollments" class="table-row">
+              <div class="td td-email">
+                <div class="student-avatar">
+                  {{ e.student_email?.charAt(0)?.toUpperCase() }}
+                </div>
+                {{ e.student_email }}
+              </div>
+              <div class="td">{{ e.student_name }}</div>
+              <div class="td">{{ e.enrolled_date | date:'mediumDate' }}</div>
+              <div class="td td-action">
+                <button class="action-btn action-del"
+                        (click)="removeStudent(e.id)">
+                  🗑 Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty students state -->
+        <div *ngIf="!enrollments || enrollments.length === 0"
+             class="empty-state">
+          <div class="empty-icon">👥</div>
+          <h3>No Students Yet</h3>
+          <p>Share your subscription key to invite students.</p>
+        </div>
+      </div>
+
+    </div><!-- /tabs-content -->
+  </div><!-- /detail-content -->
+</div>
+</div>
+
