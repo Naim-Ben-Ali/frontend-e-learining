@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  SERVER_URL: 'http://localhost:8080',
-  BASE_URL: 'http://localhost:8080/api/v1',
+  SERVER_URL: 'https://backend-e-learing.onrender.com',
+  BASE_URL: 'https://backend-e-learing.onrender.com/api/v1',
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',
