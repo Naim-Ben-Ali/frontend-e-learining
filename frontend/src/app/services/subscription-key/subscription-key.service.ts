@@ -61,6 +61,7 @@ export class SubscriptionKeyService {
     return this.http.get<SubscriptionKey[]>(
       `${this.baseUrl}/subscriptions/teacher/keys`
     ).pipe(
+      map((keys: any[]) => keys.map(k => this.normalizeKey(k))),
       tap(keys => {
         keys.forEach(key => this.cacheKey(key.course_id, key));
       }),
@@ -78,6 +79,7 @@ export class SubscriptionKeyService {
       `${this.baseUrl}/subscriptions/courses/${courseId}/key/regenerate`,
       {}
     ).pipe(
+      map(key => this.normalizeKey(key)),
       tap(key => this.cacheKey(courseId, key)),
       catchError(error => this.handleHttpError(error, 'Failed to regenerate subscription key'))
     );
