@@ -3,7 +3,7 @@ import {API_CONFIG} from "../../config/api.config";
 import {BehaviorSubject, Observable, throwError, tap} from "rxjs";
 import {SubscriptionKey, SubscriptionRequest} from "../../models/subscription-key.model";
 import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import {catchError, retry} from "rxjs/operators";
+import {catchError, retry, map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,22 @@ export class SubscriptionKeyService {
 
   constructor(private http: HttpClient) {}
 
+    /**
+   * Normalize backend camelCase response to frontend snake_case model
+   */
+  private normalizeKey(raw: any): SubscriptionKey {
+    return {
+      id: raw?.id,
+      subscription_key: raw?.subscriptionKey ?? raw?.subscription_key,
+      course_id: raw?.courseId ?? raw?.course_id,
+      course_name: raw?.courseName ?? raw?.course_name,
+      teacher_id: raw?.teacherId ?? raw?.teacher_id,
+      is_active: raw?.active ?? raw?.is_active,
+      created_date: raw?.createdDate ?? raw?.created_date,
+      deactivated_date: raw?.deactivatedDate ?? raw?.deactivated_date ?? null
+    } as SubscriptionKey;
+  }
+
   /**
    * Get the current active subscription key for a specific course
    */
@@ -24,6 +40,7 @@ export class SubscriptionKeyService {
       `${this.baseUrl}/subscriptions/courses/${courseId}/key/active`
     ).pipe(
       retry(1),
+      map(key => this.normalizeKey(key)),
       tap(key => this.cacheKey(courseId, key)),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
